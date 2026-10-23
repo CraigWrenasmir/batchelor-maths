@@ -240,3 +240,26 @@ html[data-mode="class"] .two-col { grid-template-columns: minmax(0, 1fr) minmax(
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* Combined sampler: consistent help and contained responsive dialogs. */
+[hidden] { display: none !important; }
+.app { grid-template-rows: auto auto 1fr auto; }
+.help-bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:12px 16px 0; }
+.help-bar .btn { font-size:.9em; padding:6px 16px; }
+.help-bar #btn-sound[aria-pressed="true"] { background:var(--green-tint); border-color:var(--green); }
+.line-adjust { display:flex; gap:10px; flex-wrap:wrap; align-items:center; flex-basis:100%; }
+.two-col > *, .panel, .step { min-width:0; }
+button, a, select { touch-action:manipulation; }
+dialog.drawer { inset:auto; margin:auto; width:min(680px,calc(100% - 24px)); max-height:calc(100dvh - 24px); padding:0; border:0; border-radius:16px; background:var(--paper); }
+dialog.drawer[open] { display:block; }
+dialog.drawer .sheet { width:100%; max-width:none; max-height:calc(100dvh - 24px); }
+dialog::backdrop { background:rgba(31,42,36,.55); }
+.example-dialog { width:min(1000px,calc(100% - 24px)); max-height:calc(100dvh - 24px); overflow:auto; border:0; border-radius:18px; padding:24px; color:var(--ink); background:var(--paper); }
+.example-dialog h2 { margin-top:0; }
+.demo-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.demo-step { background:white; border-radius:14px; padding:16px; }
+.demo-step h3 { margin:0 0 12px; font-size:1.05em; }
+.demo-picture { color:var(--creek); font-size:1.5em; min-height:90px; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; text-align:center; gap:8px; }
+.demo-step p { margin-bottom:0; }
+@media(max-width:900px) { html[data-mode="class"] .two-col { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:640px) { .demo-grid { grid-template-columns:1fr; } .app-bar { padding:10px; } .app-bar .tools { width:100%; } .app-bar .bar-btn { padding:6px 10px; font-size:.9em; } .help-bar { padding:10px 10px 0; } main.stage { padding:10px; } }

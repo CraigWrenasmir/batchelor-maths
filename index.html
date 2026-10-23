@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1f3f2c">
-<title>Maths investigations</title>
+<title>Batchelor Maths Sampler</title>
 <link rel="stylesheet" href="src/shared.css">
 <link rel="icon" href="assets/logo-placeholder.svg" type="image/svg+xml">
 <style>
-  .home { max-width: 1100px; margin: 0 auto; padding: 24px 16px 0; }
+  .home { max-width: 1200px; margin: 0 auto; padding: 24px 16px 0; }
   .masthead { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
   .masthead img { width: 72px; height: 72px; border-radius: 16px; }
   .masthead .school { margin: 0; font-size: 1.05em; color: var(--ink-soft); font-weight: 600; }
   .masthead h1 { margin: 2px 0 0; font-size: 2.2em; line-height: 1.1; color: var(--green-deep); }
   .tagline { color: var(--ink-soft); margin: 10px 0 26px; font-size: 1.1em; }
-  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
-  .tile { display: block; background: #fff; border-radius: 18px; box-shadow: var(--shadow); padding: 20px; text-decoration: none; color: var(--ink); border: 2px solid transparent; min-height: 200px; }
+  .tiles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 18px; }
+  .tile { grid-column:span 2; display: block; background: #fff; border-radius: 18px; box-shadow: var(--shadow); padding: 20px; text-decoration: none; color: var(--ink); border: 2px solid transparent; min-height: 200px; }
   .tile:hover, .tile:focus-visible { border-color: var(--green); }
   .tile h2 { margin: 12px 0 6px; font-size: 1.5em; color: var(--green-deep); }
   .tile p { margin: 0; color: var(--ink-soft); }
@@ -23,6 +23,9 @@
   .teacher-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin: 28px 0 18px; }
   .ack { color: var(--ink-soft); font-size: 0.9em; margin: 18px 0 8px; }
   footer.horizon { margin-top: 24px; }
+  .tile:nth-child(-n+2) { grid-column:span 3; }
+  @media(max-width:900px) { .tiles { grid-template-columns:repeat(2,minmax(0,1fr)); } .tile,.tile:nth-child(-n+2) { grid-column:auto; } }
+  @media(max-width:560px) { .tiles { grid-template-columns:minmax(0,1fr); } .masthead h1 { font-size:1.8em; } }
   .draft { display: inline-block; background: var(--clay-light); color: var(--clay); font-weight: 700; font-size: 0.75em; padding: 2px 10px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
 </style>
 </head>
@@ -38,6 +41,15 @@
   <p class="tagline" id="tagline"></p>
 
   <nav class="tiles" aria-label="Activities">
+    <a class="tile" href="activities/pack-the-gear.html?packRange=10&amp;support=guided">
+      <svg viewBox="0 0 450 90" aria-hidden="true"><rect width="450" height="90" rx="12" fill="#e3eada"/><rect x="48" y="20" width="150" height="54" rx="12" fill="#fff" stroke="#2f5f3f" stroke-width="3"/><rect x="252" y="20" width="150" height="54" rx="12" fill="#fff" stroke="#2f5f3f" stroke-width="3"/><g fill="#b65a2e"><circle cx="79" cy="47" r="13"/><circle cx="123" cy="47" r="13"/><circle cx="167" cy="47" r="13"/></g><g fill="#2f6f8a"><circle cx="295" cy="47" r="13"/><circle cx="354" cy="47" r="13"/></g></svg>
+      <h2>Pack the gear</h2><p>Make a total. Split it, change it and find another way.</p>
+    </a>
+    <a class="tile" href="activities/find-the-way.html?routeLevel=short&amp;support=guided">
+      <svg viewBox="0 0 450 90" aria-hidden="true"><rect width="450" height="90" rx="12" fill="#dce9e9"/><path d="M80 66 H180 V25 H340" fill="none" stroke="#2f6f8a" stroke-width="8" stroke-linejoin="round" stroke-dasharray="12 7"/><circle cx="80" cy="66" r="15" fill="#2f5f3f"/><path d="M340 61 V12 L379 25 L340 39" fill="#b65a2e" stroke="#1f3f2c" stroke-width="3"/></svg>
+      <h2>Find the way</h2><p>Plan a route. Test your arrows, then solve a new problem.</p>
+    </a>
+
     <a class="tile" href="activities/how-many.html">
       <svg viewBox="0 0 300 90" aria-hidden="true"><rect width="300" height="90" rx="12" fill="#e9dcc0"/>
         <g fill="#b5673a"><path d="M40 78 L36 48 Q38 22 48 20 Q58 22 60 48 L56 78Z"/><path d="M96 80 L93 56 Q94 36 102 35 Q110 36 111 56 L108 80Z"/><path d="M150 78 L146 44 Q148 16 158 14 Q168 16 170 44 L166 78Z"/><path d="M212 80 L209 58 Q210 40 218 39 Q226 40 227 58 L224 80Z"/><path d="M258 78 L254 52 Q256 28 266 26 Q276 28 278 52 L274 78Z"/></g>
@@ -45,7 +57,7 @@
       <h2>How many?</h2>
       <p>Estimate a collection, then count it in groups and see the structure.</p>
     </a>
-    <a class="tile" href="activities/where-does-it-go.html">
+    <a class="tile" href="activities/where-does-it-go.html?preset=to20">
       <svg viewBox="0 0 300 90" aria-hidden="true"><rect width="300" height="90" rx="12" fill="#cfe3ea"/>
         <line x1="30" y1="55" x2="270" y2="55" stroke="#2f6f8a" stroke-width="8" stroke-linecap="round"/>
         <g stroke="#1f2a24" stroke-width="3"><line x1="30" y1="42" x2="30" y2="68"/><line x1="150" y1="44" x2="150" y2="66"/><line x1="270" y1="42" x2="270" y2="68"/></g>
@@ -54,7 +66,7 @@
       <h2>Where does it go?</h2>
       <p>Place numbers on an empty line, or hunt for a mystery number.</p>
     </a>
-    <a class="tile" href="activities/grow-the-pattern.html">
+    <a class="tile" href="activities/grow-the-pattern.html?preset=repeat">
       <svg viewBox="0 0 300 90" aria-hidden="true"><rect width="300" height="90" rx="12" fill="#efe5d2"/>
         <g fill="#2f6f8a"><rect x="40" y="56" width="18" height="18" rx="3"/><rect x="110" y="56" width="18" height="18" rx="3"/><rect x="190" y="56" width="18" height="18" rx="3"/></g>
         <g fill="#b65a2e"><rect x="60" y="56" width="18" height="18" rx="3"/><rect x="40" y="36" width="18" height="18" rx="3"/>
@@ -68,12 +80,18 @@
   <div class="teacher-row">
     <a class="btn" href="teacher.html">Teacher set up</a>
     <a class="btn btn-quiet" href="docs/teacher-guides.html">Teacher guides</a>
-    <span class="muted small">Sampling release <span class="draft">draft for review</span></span>
+    <span class="muted small">Five activities <span class="draft">classroom trial</span></span>
   </div>
   <p class="ack" id="ack"></p>
 </div>
 <footer class="horizon" id="horizon"></footer>
 <script type="module">
+  const old = new URLSearchParams(location.search);
+  if(['pack','route'].includes(old.get('activity'))) {
+    const page=old.get('activity')==='pack'?'pack-the-gear':'find-the-way'; old.delete('activity');
+    if(old.get('mode')==='classroom')old.set('mode','class');if(old.get('mode')==='practice')old.set('mode','ipad');
+    location.replace(`activities/${page}.html?${old}`);
+  }
   import { school } from './src/config.js';
   import { horizonSvg } from './src/ui/scenes.js';
   document.getElementById('school-name').textContent = school.name;

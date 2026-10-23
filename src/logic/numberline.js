@@ -76,7 +76,8 @@ export function judgePlacement(value, placed, preset) {
   const range = preset.max - preset.min;
   const errorFrac = Math.abs(placed - value) / range;
   let grade;
-  if (errorFrac <= 0.015) grade = 'spot';
+  // Input already snaps to the preset resolution. Only the actual value is exact.
+  if (Math.abs(placed - value) < 0.000001) grade = 'spot';
   else if (errorFrac <= 0.05) grade = 'close';
   else grade = 'off';
   const direction = placed === value ? 'same' : placed > value ? 'right' : 'left';

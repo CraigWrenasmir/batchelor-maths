@@ -3,157 +3,167 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Teacher guides</title>
+<title>Teacher guides · Batchelor maths sampler</title>
 <link rel="stylesheet" href="../src/shared.css">
 <link rel="icon" href="../assets/logo-placeholder.svg" type="image/svg+xml">
 <style>
-  .wrap { max-width: 860px; margin: 0 auto; padding: 20px 16px 60px; }
-  h1 { color: var(--green-deep); }
-  h2 { color: var(--green-deep); margin-top: 2.2em; border-top: 3px solid var(--paper-3); padding-top: 0.8em; }
-  h3 { margin-top: 1.4em; font-size: 1.05em; }
-  .box { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 20px; margin: 12px 0; }
-  .codes { font-size: 0.85em; color: var(--ink-soft); }
-  nav ul { list-style: none; padding: 0; display: flex; gap: 14px; flex-wrap: wrap; }
-  nav a { display: inline-block; padding: 8px 14px; background: #fff; border-radius: 10px; box-shadow: var(--shadow); text-decoration: none; font-weight: 600; }
-  li { margin: 4px 0; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.95em; }
-  th, td { border: 1px solid var(--paper-3); padding: 6px 10px; text-align: left; vertical-align: top; }
-  th { background: var(--paper-2); }
+.wrap{max-width:900px;margin:0 auto;padding:20px 16px 60px}h1,h2{color:var(--green-deep)}h2{margin-top:2.2em;border-top:3px solid var(--paper-3);padding-top:.8em;scroll-margin-top:1em}h3{margin-top:1.4em;font-size:1.05em}.box{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px;margin:12px 0}.codes{font-size:.85em;color:var(--ink-soft)}nav ul{list-style:none;padding:0;display:flex;gap:10px;flex-wrap:wrap}nav a{display:inline-flex;align-items:center;min-height:48px;padding:8px 14px;background:#fff;border-radius:10px;box-shadow:var(--shadow);text-decoration:none;font-weight:600}li{margin:8px 0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.95em}th,td{border:1px solid var(--paper-3);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--paper-2)}a:focus-visible{outline:3px solid var(--creek);outline-offset:3px}@media print{nav,.back{display:none}.box{box-shadow:none;border:1px solid #bbb}h2,h3{break-after:avoid}tr{break-inside:avoid}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <p><a href="../index.html">← Home</a> · <a href="../teacher.html">Teacher set up</a></p>
-  <h1>Teacher guides</h1>
-  <p class="muted">Three investigations, each built to run for 15 to 20 minutes with talk, not a 30-second tap drill. Each guide gives the objective, what students need first, a demonstration, a routine, how to adjust support and challenge, and a quick check away from the screen. Year levels and curriculum codes are listed here for planning only; the student screen never shows them.</p>
-  <nav aria-label="Guides"><ul>
-    <li><a href="#how-many">How many?</a></li>
-    <li><a href="#where">Where does it go?</a></li>
-    <li><a href="#grow">Grow the pattern</a></li>
-    <li><a href="#routines">Whole-class routines</a></li>
-  </ul></nav>
+<p class="back"><a href="../index.html">← Home</a> · <a href="../teacher.html">Teacher setup</a></p>
+<h1>Teacher guides</h1>
+<p>Five investigations for modelling on the Smartboard and individual or paired practice on an iPad. Choose one activity for a first trial. These are practice opportunities, not assessments. Challenge, support and age are separate: an older learner may benefit from small numbers with visible prompts, and a confident learner may need a demanding task with help using the device.</p>
+<p class="muted">The school scope-and-sequence attachments contained no readable content, so school alignment remains to be checked. The provisional <a href="curriculum-map.md">curriculum map</a> identifies selected Australian Curriculum v9 connections. Year levels and codes support teacher planning; they are not student labels. See the <a href="testing-log.md">testing log</a> for browser checks and remaining classroom-device checks.</p>
+<nav aria-label="Guides"><ul>
+<li><a href="#routines">Plan a session</a></li><li><a href="#how-many">How many?</a></li><li><a href="#where">Where does it go?</a></li><li><a href="#grow">Grow the pattern</a></li><li><a href="#pack-the-gear">Pack the gear</a></li><li><a href="#find-the-way">Find the way</a></li><li><a href="#controls">Controls and support</a></li>
+</ul></nav>
 
-  <h2 id="how-many">How many?</h2>
-  <div class="box">
-    <h3>Objective</h3>
-    <p>Students estimate the size of a collection, then count it accurately by organising it into groups (fives, tens, rows), and compare the count with their estimate. They explain the structure: "2 tens and 3 ones", "4 rows of 6", "3 groups of 5 and 2 more".</p>
-    <p class="codes">Australian Curriculum v9: AC9MFN02, AC9MFN03 (subitise, quantify and compare to 20); AC9M1N01, AC9M1N02, AC9M1N03 (to 120, partition into tens and ones, skip count); AC9M2N02, AC9M2N05 (regroup, arrays); AC9M3N04, AC9M4A02 (multiplication with arrays).</p>
-    <h3>Before you start</h3>
-    <ul>
-      <li>Students can count a small collection by touching each item once (one-to-one).</li>
-      <li>For presets with tens: students have met "ten" as a unit (a bundle, a ten-frame, a rod).</li>
-      <li>For arrays: students have counted equal rows before and can skip count by 2, 5 or 10.</li>
-    </ul>
-    <h3>Demonstration (5 minutes, big screen)</h3>
-    <ol>
-      <li>Open the activity in Big screen mode with a preset such as "Up to 50, scattered, count in tens" and a context the class likes (termite mounds, fish, mangoes).</li>
-      <li>Ask the class for estimates. Take three or four, including an unlikely one. Type one into the keypad. Say: "We will find out how close we were."</li>
-      <li>Tap items to count. Point out the colour change every ten and the rods building up in the tally. Say the tally aloud: "2 tens and 3 is 23".</li>
-      <li>Tap "I have counted them all" and read the feedback together. Ask: "Was our estimate more or fewer? By how many?"</li>
-      <li>Use Hint before the next round to show what a group of ten looks like, then ask for estimates again.</li>
-    </ol>
-    <h3>Suggested routine (15 to 20 minutes, iPads in pairs)</h3>
-    <ol>
-      <li>Pairs take turns: one estimates, the other counts, then swap.</li>
-      <li>After each round, pairs tell each other one thing that helped the estimate.</li>
-      <li>After four rounds, bring the class back to the board for one shared round and the talk prompts.</li>
-    </ol>
-    <h3>Adjusting support and challenge</h3>
-    <table>
-      <tr><th>If...</th><th>Try</th></tr>
-      <tr><td>Students count one by one and lose track</td><td>"Groups of 5" or "Groups of 10" presets, where items already sit in clusters. Use Count next on the board so the order is visible.</td></tr>
-      <tr><td>Estimates are wild guesses</td><td>Use Hint before estimating (shows one group of ten). Compare with a known benchmark: "Is it more than 10? More than 50?"</td></tr>
-      <tr><td>Students count accurately and quickly</td><td>Arrays presets. Ask for the count without touching each item. Then "Rows up to 10 × 12".</td></tr>
-      <tr><td>Older students on foundational counting</td><td>Keep the neutral contexts (counters, blocks, creek stones) and Light support. The screen never shows a year level.</td></tr>
-      <tr><td>Subitising practice</td><td>"Up to 10" preset with Quick look on: the scene shows for 3 seconds.</td></tr>
-    </table>
-    <h3>Check away from the screen</h3>
-    <p>Put a handful of counters, bottle tops or stones on the table (between 12 and 40, matched to the preset). Ask for an estimate, then ask the student to count them "in a way that helps you not lose track". Note whether they group, and whether they can say the total as groups and leftovers ("3 tens and 4").</p>
-  </div>
+<h2 id="routines">A possible 15–20-minute session</h2>
+<div class="box">
+<p>This timing is a suggested trial plan, not a claim about sustained engagement. Shorten, pause, repeat or move to physical materials when useful. Have counters, blocks, paper strips or a paper grid ready.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Time</th><th>What to do</th></tr></thead><tbody>
+<tr><td>3 minutes · Model</td><td>Use Big screen mode. Demonstrate the controls with Show me, then solve one small example together. Think aloud briefly and let a student demonstrate the next action.</td></tr>
+<tr><td>5–7 minutes · Try</td><td>Students try a related task individually or in pairs. In pairs, one plans and the other operates the controls; swap roles. Notice strategies before adding prompts.</td></tr>
+<tr><td>4–6 minutes · Explain and change</td><td>Compare two approaches. Change a quantity, landmark, pattern step or route condition. Predict, test and revise. Invite a partner challenge when the activity offers it.</td></tr>
+<tr><td>3–4 minutes · Check away from the screen</td><td>Ask students to show the same idea with objects, a paper line, a pattern or arrow cards. Accept gesture, moving objects, speech or a student's usual communication system.</td></tr>
+</tbody></table></div>
+<p>Keep the mathematical task similar when moving from board demonstration to iPad practice. Establish unfamiliar words through action. Successful taps alone do not establish understanding: distinguish device, language, attention and memory demands from the mathematics.</p>
+<p>Use school-approved contexts. Ask students what they would like to count, pack or navigate before developing later local versions. Local stories, language and cultural imagery need appropriate school and community contributions.</p>
+</div>
 
-  <h2 id="where">Where does it go?</h2>
-  <div class="box">
-    <h3>Objective</h3>
-    <p>Students reason about the size of numbers by placing them on an empty or lightly marked number line, using landmarks (0, halfway, tens) to justify the position. In Mystery number, they use "bigger / smaller" clues and see the possible range shrink, which builds the halving strategy.</p>
-    <p class="codes">Australian Curriculum v9: AC9MFN01, AC9M1N01, AC9M2N01, AC9M3N01 (represent and order numbers to 20, 120, 1000 and beyond on number lines); AC9M2N03, AC9M3N02, AC9M5N03, AC9M6N03 (fractions on a number line); AC9M4N01 (decimals); AC9M6N01 (integers).</p>
-    <h3>Before you start</h3>
-    <ul>
-      <li>Students can read the numbers in the preset range (or the dot cards in 0 to 20).</li>
-      <li>Students have used a numbered line or hundred chart before. The empty line is a step on from that.</li>
-    </ul>
-    <h3>Demonstration (5 minutes, big screen)</h3>
-    <ol>
-      <li>Open "0 to 100" in Big screen mode. Point to the ends and the halfway mark. Ask: "What number lives here?"</li>
-      <li>Pick a card. Ask three students where it should go and why, before anyone touches the board. Place it where the class agrees.</li>
-      <li>Place the rest, then press Check. Dashed markers are not right yet: the feedback says which way to move them. Move them and check again. The green triangles then show the exact spot.</li>
-      <li>Read the feedback sentence aloud: "17 is between 10 and 20, closer to 20." This is the language you want students to use.</li>
-    </ol>
-    <h3>Suggested routine</h3>
-    <ol>
-      <li>Pairs on iPads: one places, the other has to agree before Check. Two rounds.</li>
-      <li>Switch to Mystery number. Challenge: find it in the fewest guesses. Pairs record their guess counts on paper and discuss what a "good" first guess is.</li>
-      <li>Back on the board: use Hint in Mystery mode to make the halving strategy explicit.</li>
-    </ol>
-    <h3>Adjusting support and challenge</h3>
-    <table>
-      <tr><th>If...</th><th>Try</th></tr>
-      <tr><td>Students place everything at one end</td><td>Use a preset with tick marks (0 to 100) and Full support, and talk about halfway first.</td></tr>
-      <tr><td>Students are confident with whole numbers</td><td>"0 to 100, no tick marks", then "0 to 1000", then fractions: halves and quarters.</td></tr>
-      <tr><td>Fraction placement is random</td><td>Go back to "halves and quarters" and fold a strip of paper to match.</td></tr>
-      <tr><td>Local context</td><td>"Road distances from Batchelor" places real places by kilometres. Check the figures with the school before relying on them.</td></tr>
-      <tr><td>Older students, integers or decimals</td><td>"Integers -10 to 10" and "Decimals 0 to 10". Same screen, no change in look.</td></tr>
-    </table>
-    <h3>Check away from the screen</h3>
-    <p>Draw a line on paper with 0 at one end and 100 (or the preset's top number) at the other. Give three numbers on cards. Ask the student to place them and say why. Listen for landmarks: "it's past halfway", "it's close to 100".</p>
-  </div>
+<h2 id="how-many">How many?</h2>
+<div class="box">
+<h3>Focus and starting point</h3>
+<p>Estimate a collection, find its total, and explain a useful grouping. Start with a quantity students can count accurately. Use groups of five or ten when students are ready to treat a group as a unit; use arrays to connect rows with multiplication.</p>
+<p class="codes">Selected connections: AC9MFN01–03; AC9M1N01–03; AC9M1A01; AC9M2N02, AC9M2N05; AC9M3N04; AC9M4A02. Preset limits and partial coverage are described in the curriculum map.</p>
+<h3>Model</h3>
+<ol>
+<li>Ask for an estimate and enter it, or choose Skip the estimate to focus on counting. An estimate is a useful starting idea, not a score.</li>
+<li>Demonstrate one-to-one counting by tapping objects. For a scattered collection, choose <strong>Make groups of 5/10</strong>; the same objects are rearranged.</li>
+<li>Use a whole-group or row button to count that group. If some members were already counted, the button adds only those left. Undo reverses the last counting action.</li>
+<li>If the class has worked out the total by grouping or multiplication, choose <strong>I know the total</strong> and enter it. A wrong answer gives a direction to investigate and can be retried; it does not reveal the total.</li>
+<li>Compare the final total with the estimate and discuss the checking strategy. Try the original and grouped layouts: “What changed? Did the total change?”</li>
+</ol>
+<h3>Adjust support and challenge</h3>
+<ul>
+<li>For students losing track, start with a small collection, visible tally and physical counters alongside it. Count one remains an alternative to small on-screen objects.</li>
+<li>To deepen reasoning without larger numbers, ask for two ways to check the same total or a prediction after adding five.</li>
+<li>For arrays, ask how many are in one row and how many rows there are before entering a total. Whole-row buttons can verify the reasoning without tapping every object.</li>
+<li>Quick look is optional. The “Up to 10” preset can show more than five objects, so use small groups or teacher-selected physical collections for focused subitising to five. Keep the scene visible when time pressure adds an access barrier.</li>
+</ul>
+<h3>Check away from the screen</h3>
+<p>Give a collection matched to the student's range. Ask for an estimate and a way to count without losing track. Rearrange it and ask whether the total changed. Listen for groups and leftovers, rather than requiring a written equation.</p>
+</div>
 
-  <h2 id="grow">Grow the pattern</h2>
-  <div class="box">
-    <h3>Objective</h3>
-    <p>Students see how a visual pattern grows, build the next step, predict a step they cannot see, and describe the rule in words ("each step adds 2, plus the corner"). This is early algebraic thinking: a relationship between the step number and the number of tiles. The repeating-pattern presets build the earlier skill of recognising a unit that repeats.</p>
-    <p class="codes">Australian Curriculum v9: AC9MFA01 (repeating patterns); AC9M1A01, AC9M2A01 (skip counting and additive patterns that increase by a constant); AC9M3A01 (unknown values); AC9M6A01 (rules for visually growing patterns); AC9M7A01 (variables and formulas).</p>
-    <h3>Before you start</h3>
-    <ul>
-      <li>Repeating patterns: students can copy a simple two-colour pattern with objects.</li>
-      <li>Growing patterns: students can count a small array and add on a small number.</li>
-      <li>Find the rule: students can multiply by a one-digit number.</li>
-    </ul>
-    <h3>Demonstration (5 minutes, big screen)</h3>
-    <ol>
-      <li>Open "Growing patterns with a fixed part". Ask: "What is the same in every step? What is different?"</li>
-      <li>Count the tiles in steps 1, 2 and 3 together. Ask: "How many more each time?"</li>
-      <li>Invite a student to build step 4 on the board by tapping squares. Check. The feedback colours the fixed tiles blue and the added tiles orange.</li>
-      <li>Ask for step 5 without building it. Then step 10. Use the table of values. Ask: "How could we work out step 100?"</li>
-    </ol>
-    <h3>Suggested routine</h3>
-    <ol>
-      <li>Pairs on iPads: build, predict, read the rule. Two patterns.</li>
-      <li>Away from the screen: pairs make their own growing pattern with blocks or counters and give it to another pair to continue.</li>
-      <li>Class share: one pattern on the board, class predicts step 10 together.</li>
-    </ol>
-    <h3>Adjusting support and challenge</h3>
-    <table>
-      <tr><th>If...</th><th>Try</th></tr>
-      <tr><td>Students cannot see what repeats</td><td>Repeating patterns preset. Say the pattern aloud and clap it. Use Hint to show the unit.</td></tr>
-      <tr><td>Students build the right count but a different shape</td><td>That is fine: Check judges the count. Ask them to explain where the new tiles went.</td></tr>
-      <tr><td>Students predict by drawing every step</td><td>Ask for step 100. "Find the rule" preset adds step 100 to the table.</td></tr>
-      <tr><td>Students want something harder</td><td>"Challenge: stairs" grows by a different amount each step.</td></tr>
-    </table>
-    <h3>Check away from the screen</h3>
-    <p>Show three steps of a pattern made with blocks (for example an L shape). Ask the student to build step 4, then tell you how many blocks step 6 would need without building it, and how they know.</p>
-  </div>
+<h2 id="where">Where does it go?</h2>
+<div class="box">
+<h3>Focus and starting point</h3>
+<p>Place numbers using size and landmarks: ends, halfway, tens or whole numbers. Start with a range and representation the learner recognises. Fraction, decimal and integer presets extend the mathematical content while retaining the same interface.</p>
+<p class="codes">Selected connections: AC9MFN01, AC9M1N01, AC9M2N01, AC9M3N01; AC9M2N03, AC9M3N02, AC9M5N03, AC9M6N03; AC9M4N01, AC9M5N01; AC9M6N01.</p>
+<h3>Model</h3>
+<ol>
+<li>Point to the ends and a useful landmark. Ask where a card belongs and why before placing it.</li>
+<li>Select a card, then tap the line. Use <strong>Move left</strong> and <strong>Move right</strong>, or the keyboard arrows, to refine the position.</li>
+<li>Press Check. <strong>Close</strong> and <strong>exactly placed</strong> are different results. Close cards stay editable; use the feedback and landmarks to adjust and check again.</li>
+<li>Ask a partner to explain the placement: “It is past halfway”, “It is between 10 and 20”, or “It is one quarter of the way along.”</li>
+</ol>
+<h3>Adjust support and challenge</h3>
+<ul>
+<li>Begin with visible ticks and smaller ranges. Move to fewer landmarks when students can explain how they locate an unmarked value.</li>
+<li>For fractions, fold a paper strip into equal parts alongside the line. Explicitly connect the parts to the labels.</li>
+<li>In Mystery number, use bigger/smaller clues to discuss which values remain possible. Compare two guessing strategies; a small guess count is a discussion point, not a leaderboard or a test of speed.</li>
+<li>The road-distance preset contains draft local figures. Check distances and starting points with the school before teaching them as facts; use ordinary number presets in the meantime.</li>
+</ul>
+<h3>Check away from the screen</h3>
+<p>Draw a line with the same endpoints on paper. Ask the student to place three number cards and explain the landmarks used. Allow an approximate physical placement followed by a precise verbal or written value.</p>
+</div>
 
-  <h2 id="routines">Whole-class routines and controls</h2>
-  <div class="box">
-    <ul>
-      <li><strong>Big screen mode</strong> makes everything larger and adds a teacher bar: Hint (H), Reveal (R), Next (N), Start again (S). The letters work on a keyboard; the buttons work by touch.</li>
-      <li><strong>Sound</strong> is off until someone turns it on. It uses the device's own voice to read numbers and feedback. If the device has no voice, the button is greyed out and nothing else changes.</li>
-      <li><strong>New learner</strong> clears the current round so the next student starts fresh. Nothing about a student is saved.</li>
-      <li><strong>Round code</strong> (in Set up) makes every iPad show the same rounds, which is useful for a shared discussion.</li>
-      <li><strong>Full screen</strong> is optional. On iPad, add the page to the Home Screen for a cleaner view.</li>
-      <li><strong>Keyboard</strong>: every control is reachable with Tab. On the number line, arrow keys move the marker and Enter confirms. In How many?, "Count next" counts without needing to tap each item.</li>
-    </ul>
-  </div>
+<h2 id="grow">Grow the pattern</h2>
+<div class="box">
+<h3>Focus and starting point</h3>
+<p>For repeating patterns, find and continue the repeating unit. For growing patterns, build the next step, compare its shape and total, predict later totals and explain the rule. Begin with copying a simple pattern or counting a small array before introducing distant predictions.</p>
+<p class="codes">Selected connections: AC9MFA01; AC9M1A01, AC9M2A01, AC9M3A01; AC9M6A01, AC9M7A01. The last two are opportunities for guided generalisation, not a complete algebra programme.</p>
+<h3>Model</h3>
+<ol>
+<li>Look at the first three steps. Ask what stays the same and what changes.</li>
+<li>Build step 4 on the larger tap grid, then check both the number of tiles and the arrangement.</li>
+<li>If the total matches but the shape differs, compare the learner's construction with the shown pattern. The learner's work stays visible. They can revise it or keep it as an alternative.</li>
+<li>When predicting later totals, use the growth rule in the <strong>shown pattern</strong>. A different arrangement with the same total does not by itself establish the same growth rule.</li>
+<li>For stairs, identify the new column at each step: the amount added grows by one each time. This is different from a pattern that adds a constant number of tiles.</li>
+</ol>
+<h3>Adjust support and challenge</h3>
+<ul>
+<li>Say, clap or build a repeating unit with physical objects before continuing it on screen.</li>
+<li>Keep numbers manageable and ask students to identify the fixed part and the growing part. Accept a demonstration before asking for a symbolic rule.</li>
+<li>Use step 10 or 100 to invite generalisation rather than drawing every step. Compare a student's strategy with the displayed rule.</li>
+<li>A learner may choose an arrangement that looks different but follows a defensible rule. Discuss that rule separately; the app's later questions still refer to the supplied pattern.</li>
+</ul>
+<h3>Check away from the screen</h3>
+<p>Show three steps made with blocks. Ask the student to build step 4, then predict step 6 without building it. Invite them to make a pattern for a partner and explain how it changes.</p>
+</div>
+
+<h2 id="pack-the-gear">Pack the gear</h2>
+<div class="box">
+<h3>Focus and starting point</h3>
+<p>Make a collection, see it as two parts, keep track of its total and reason about a changed amount. Choose amounts up to 5, 10 or 20. Start small enough that the learner can attend to relationships between the parts and the whole.</p>
+<p class="codes">Selected connections: AC9MFN04 (partition and combine up to 10); AC9M1N04 (addition and subtraction within 20).</p>
+<h3>Model and explore the five parts</h3>
+<ol>
+<li><strong>Make the request:</strong> use the tray + and − buttons to make the requested total. Ask how the learner knows the total.</li>
+<li><strong>Find another split:</strong> move one object between trays using A → B or B → A. Ask what changed and what stayed the same.</li>
+<li><strong>Change the request:</strong> adjust the existing collection rather than starting over. Predict how many need adding or removing.</li>
+<li><strong>Repair:</strong> inspect a collection with too many or too few and show a useful change.</li>
+<li><strong>Make a challenge:</strong> use the request + and − controls to choose a target within the selected range. A partner can pack it and find another split.</li>
+</ol>
+<p>Accept every valid partition, including an empty tray. A different split means a different distribution between trays, not moving objects within one tray. Dwell on a useful part rather than treating completion of all five as the goal.</p>
+<h3>Adjust support and challenge</h3>
+<ul>
+<li><strong>Visible prompts:</strong> request dots, numbered objects, a running equation and feedback about how many more or fewer are needed.</li>
+<li><strong>Hints on request:</strong> the collections, tray counts and running equation remain visible; learners can request a hint.</li>
+<li><strong>Try independently:</strong> collections and tray counts remain visible; the equation appears after checking. Examples and hints remain available.</li>
+<li>Increase reasoning without increasing the range: predict whether transferring one object changes the total, or ask for a second way to make the same request. A written equation is not required to demonstrate understanding.</li>
+</ul>
+<h3>Check away from the screen</h3>
+<p>Make six objects in two groups. Move one object between groups and ask whether there are still six. Ask the student to show another split, then change the total by one.</p>
+</div>
+
+<h2 id="find-the-way">Find the way</h2>
+<div class="box">
+<h3>Focus and starting point</h3>
+<p>Give, follow, test and revise directions that move an object to a location. First check that the learner can match one arrow to one square of movement. Short routes use a 4 × 4 grid; More steps uses 5 × 5; Changing routes uses 5 × 5 with a round stop that must be visited before the flag.</p>
+<p class="codes">Selected connection: AC9M1SP02 (give and follow directions to relocate people or objects within a space).</p>
+<h3>Model and explore the four parts</h3>
+<ol>
+<li><strong>Plan:</strong> trace a route, enter arrows and predict where it ends before choosing Test route.</li>
+<li><strong>Change:</strong> an extra block appears and the previous arrow sequence remains. Test and revise it around the block.</li>
+<li><strong>Repair:</strong> inspect a supplied sequence. Locate the first instruction that needs changing.</li>
+<li><strong>Make a challenge:</strong> choose Choose flag position, then an available square. A partner plans a route to the new destination. The start, blocks and any round stop stay in place.</li>
+</ol>
+<p>The arrows mean <strong>up, down, left and right on the displayed grid</strong>, one square at a time. They do not mean turning left or right, compass bearings, or forward relative to an object's facing direction. Demonstrate this distinction when transferring to physical movement.</p>
+<p>Tap an arrow in the sequence to remove it; Undo last removes the final arrow. Every test begins at the start. A boundary or block gives information for revision. Accept any permitted route that ends at the flag and visits the round stop when shown; the shortest route is an optional discussion, not the only correct route. Sequences allow up to 18 arrows for Short routes and 28 for the other settings.</p>
+<h3>Adjust support and challenge</h3>
+<p>Visible prompts give fuller reminders to connect arrows and squares. Hints on request and Try independently use the same shorter persistent prompts; the latter signals an initial independent attempt. Hints and examples remain available in every setting. In a pair, one learner plans and the other follows or enters the directions, then swap.</p>
+<h3>Check away from the screen</h3>
+<p>Place an object on a paper grid in the same orientation. Use arrow cards to direct it. Later explore directions in a familiar physical space with adult guidance, explicitly teaching changes in viewpoint and directional language.</p>
+</div>
+
+<h2 id="controls">Controls, support and the first trial</h2>
+<div class="box">
+<ul>
+<li><strong>Listen</strong> reads the current instruction on request. <strong>Show me</strong> opens a separate example and preserves current work. <strong>Read feedback</strong> optionally reads responses as they appear. Speech uses the browser/device voice; preview it on classroom equipment. It does not interpret student speech or provide literacy teaching.</li>
+<li><strong>Big screen</strong> enlarges the presentation and adds teacher controls. Available controls vary by activity. Revealing a solution is supported practice, not evidence of independent understanding.</li>
+<li><strong>New learner</strong> clears work and starts a fresh round or session. For Pack/Find, Start again resets the current part. Applying setup also starts fresh.</li>
+<li><strong>Round code</strong> plus the same activity and settings gives matching starting tasks on devices. Links do not contain responses or current progress. Pack has three number sequences per range; Find has four reflected map variants per route setting. These repeat; final stages allow student-created challenges.</li>
+<li><strong>Full screen</strong> is optional and depends on the device. Adding a Home Screen shortcut does not guarantee offline access. Test the actual school browser, network and board before the first session.</li>
+<li><strong>Keyboard and touch:</strong> use Tab and visible buttons; number-line adjustment controls avoid relying on precise dragging. All activities provide button/tap actions. Physical-device and assistive-technology checks remain part of the classroom trial.</li>
+</ul>
+<h3>What to notice</h3>
+<p>Observe which supports make the controls and language accessible; whether students count, group, predict, compare or revise deliberately; when they seek help; and whether the idea transfers to objects or paper. Note whether they return to a problem or create a challenge, without treating speed as success. Ask students what they would change.</p>
+<p>No performance history or student details are saved by the sampler. Teachers can record brief observations through their usual school process. Readable school curriculum documents and the first trial should guide the next content and support choices.</p>
+</div>
 </div>
 </body>
 </html>

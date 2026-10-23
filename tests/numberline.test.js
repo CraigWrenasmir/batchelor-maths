@@ -32,13 +32,21 @@ test('snap respects resolution and bounds', () => {
   assert.equal(snapValue(5000, p), 1000);
 });
 
-test('placement grades by fraction of the line', () => {
+test('exact positions are distinct from approximate positions', () => {
   const p = LINE_PRESETS.find((x) => x.id === 'to100');
   assert.equal(judgePlacement(50, 50, p).grade, 'spot');
-  assert.equal(judgePlacement(50, 51, p).grade, 'spot');
+  assert.equal(judgePlacement(50, 51, p).grade, 'close');
   assert.equal(judgePlacement(50, 54, p).grade, 'close');
   assert.equal(judgePlacement(50, 70, p).grade, 'off');
   assert.equal(judgePlacement(50, 70, p).direction, 'right');
+  for (const preset of LINE_PRESETS) {
+    const centre = snapValue((preset.min + preset.max) / 2, preset);
+    assert.equal(judgePlacement(centre, centre, preset).grade, 'spot');
+    assert.notEqual(judgePlacement(centre, centre + preset.resolution, preset).grade, 'spot');
+  }
+  const small = LINE_PRESETS.find(x => x.id === 'to20');
+  assert.equal(judgePlacement(9, 8, small).grade, 'close');
+  assert.match(placementMessage({value:9,kind:'numeral'},8,small), /^Nearly/);
 });
 
 test('benchmark text uses the ticks', () => {

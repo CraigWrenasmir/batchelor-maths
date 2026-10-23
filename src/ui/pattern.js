@@ -2,7 +2,7 @@
 // predict a far step and explain the rule. Also continues repeating patterns.
 import { mountShell, setting, feedbackEl, button, keypad, talkPrompts, el, params } from '../shared.js';
 import { makeRng, randomSeed } from '../logic/rng.js';
-import { GROWING, countAt, judgeBuild, buildMessage, predictMessage, bounds, repeatingSequence, nextInRepeating } from '../logic/patterns.js';
+import { GROWING, countAt, judgeArrangement, buildMessage, predictMessage, bounds, repeatingSequence, nextInRepeating } from '../logic/patterns.js';
 import { PATTERN_PRESETS, patternPreset } from '../../content/patterns.js';
 import { svgEl } from './scenes.js';
 
@@ -19,6 +19,7 @@ const state = {
   seed: parseInt(setting('seed', ''), 10) || randomSeed(),
   round: 0,
   pattern: null, buildStep: 4, built: new Set(), stage: 'build', predictIdx: 0, partsShown: false,
+  compared: false, alternateKept: false, revealed: false,
   unit: '', shown: [], slots: [], currentSlot: 0,
 };
 
@@ -35,6 +36,7 @@ const shell = mountShell({
 });
 shell.setDrawer(drawerContent);
 const stageEl = shell.stage;
+stageEl.classList.add('pattern-activity');
 stageEl.innerHTML = `
   <div class="two-col">
     <div class="panel"><p class="prompt" id="prompt"></p><p class="hint-text" id="sub"></p><div id="board"></div></div>
@@ -73,6 +75,9 @@ function newRound(sameSeed = false) {
   state.stage = 'build';
   state.predictIdx = 0;
   state.partsShown = false;
+  state.compared = false;
+  state.alternateKept = false;
+  state.revealed = false;
   promptEl.textContent = `Build step ${state.buildStep}.`;
   subEl.textContent = 'Look at how the pattern grows. Tap squares to add tiles.';
   renderGrow();
@@ -81,14 +86,13 @@ function newRound(sameSeed = false) {
 // ----- Growing patterns -----
 function tileSvg(cells, { showParts = false, interactive = false, gridBounds = null } = {}) {
   const b = gridBounds || bounds(cells);
-  const size = 24, pad = 4;
+  const size = interactive ? 48 : 24, pad = 4;
   const w = b.w * size + pad * 2, h = b.h * size + pad * 2;
-  const svg = svgEl('svg', { viewBox: `0 0 ${w} ${h}`, width: w, height: h, style: `width:${(b.w * 1.4).toFixed(1)}em;height:auto` });
-  const key = new Map(cells.map((c) => [`${c.x},${c.y}`, c]));
+  const svg = svgEl('svg', { viewBox: `0 0 ${w} ${h}`, width: w, height: h, style: interactive ? `--grid-cols:${b.w};--grid-rows:${b.h}` : `width:calc(${b.w} * var(--preview-tile-size, 1.4em));height:auto` });
   if (interactive) {
     for (let x = b.minX; x <= b.maxX; x++) for (let y = b.minY; y <= b.maxY; y++) {
       const k = `${x},${y}`;
-      const r = svgEl('rect', { class: `cell${state.built.has(k) ? ' on' : ''}`, x: pad + (x - b.minX) * size, y: pad + (b.maxY - y) * size, width: size, height: size, rx: 3, role: 'button', tabindex: '0', 'aria-pressed': String(state.built.has(k)), 'aria-label': `square ${x - b.minX + 1}, ${y - b.minY + 1}` });
+      const r = svgEl('rect', { class: `cell${state.built.has(k) ? ' on' : ''}`, x: pad + (x - b.minX) * size, y: pad + (b.maxY - y) * size, width: size, height: size, rx: 3, role: 'button', tabindex: '0', 'aria-pressed': String(state.built.has(k)), 'aria-label': `column ${x - b.minX + 1}, row ${b.maxY - y + 1}`, 'data-cell': k });
       const toggle = () => { if (state.built.has(k)) state.built.delete(k); else state.built.add(k); r.classList.toggle('on'); r.setAttribute('aria-pressed', String(state.built.has(k))); updateBuildCount(); };
       r.addEventListener('click', toggle);
       r.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
@@ -102,8 +106,27 @@ function tileSvg(cells, { showParts = false, interactive = false, gridBounds = n
   return svg;
 }
 
+function learnerCells() {
+  return [...state.built].map((key) => {
+    const [x, y] = key.split(',').map(Number);
+    return { x, y, part: 'plain' };
+  });
+}
+
+function comparisonShape(label, cells, showParts = false) {
+  const box = el('div', { class: 'step comparison-shape' });
+  box.append(el('div', { class: 'step-label', text: label }));
+  if (cells.length) box.append(tileSvg(cells, { showParts }));
+  else box.append(el('p', { text: 'No tiles yet.' }));
+  box.append(el('div', { class: 'muted small', text: `${cells.length} tiles` }));
+  return box;
+}
+
 function renderGrow() {
   board.innerHTML = '';
+  board.classList.add('pattern-board');
+  board.parentElement.classList.toggle('pattern-main-building', state.stage === 'build');
+  stageEl.querySelector('.two-col').classList.toggle('building-layout', state.stage === 'build');
   const steps = el('div', { class: 'steps' });
   const p = state.pattern;
   for (let n = 1; n < state.buildStep; n++) {
@@ -122,13 +145,24 @@ function renderGrow() {
     if (b.minX < 0) { gridBounds.minX -= 1; gridBounds.w += 1; }
     if (b.minY < 0) { gridBounds.minY -= 1; gridBounds.h += 1; }
   }
-  const s = el('div', { class: `step${state.stage === 'build' ? ' build' : ''}` });
-  s.append(el('div', { class: 'step-label', text: `Step ${state.buildStep}` }));
-  if (state.stage === 'build') s.append(tileSvg(buildCells, { interactive: true, gridBounds }));
-  else s.append(tileSvg(buildCells, { showParts: state.partsShown }));
-  s.append(el('div', { class: 'muted small', id: 'build-count', text: state.stage === 'build' ? `Tiles: ${state.built.size}` : `${countAt(p, state.buildStep)} tiles` }));
-  steps.append(s);
   board.append(steps);
+  if (state.stage === 'build') {
+    const s = el('div', { class: 'step build' });
+    s.append(el('div', { class: 'step-label', text: `Your step ${state.buildStep}` }));
+    s.append(el('p', { class: 'small muted grid-scroll-hint', text: 'Tap to add or remove a tile. If needed, swipe sideways to see the whole grid.' }));
+    const scroll = el('div', { class: 'pattern-grid', role: 'region', 'aria-label': 'Tile building grid. Scroll sideways if needed.', tabindex: '0' });
+    scroll.append(tileSvg(buildCells, { interactive: true, gridBounds }));
+    s.append(scroll);
+    s.append(el('div', { class: 'muted small', id: 'build-count', text: `Tiles: ${state.built.size}` }));
+    board.append(s);
+  } else {
+    const comparison = el('div', { class: 'pattern-comparison' });
+    comparison.append(comparisonShape('Your arrangement', learnerCells()));
+    comparison.append(comparisonShape(`The shown pattern: step ${state.buildStep}`, buildCells, state.partsShown));
+    board.append(comparison);
+    if (state.alternateKept) board.append(el('p', { class: 'small', text: 'Your arrangement has the same total. For the next questions, use the growth rule in the shown pattern.' }));
+    if (state.revealed) board.append(el('p', { class: 'small', text: 'Teacher reveal: the shown pattern is displayed beside your work.' }));
+  }
   renderGrowSide();
 }
 
@@ -148,24 +182,51 @@ function valuesTable(askStep) {
       if (i < state.predictIdx) return `<td>${countAt(p, n)}</td>`;
       return `<td class="${n === askStep ? 'ask' : ''}">?</td>`;
     }).join('')}</tr>`;
-  return t;
+  const wrap = el('div', { class: 'values-wrap', role: 'region', 'aria-label': 'Table of values. Scroll sideways if needed.', tabindex: '0' });
+  wrap.append(t);
+  return wrap;
 }
 
 function renderGrowSide() {
   side.innerHTML = '';
+  side.hidden = state.stage === 'build';
   const p = state.pattern;
-  if (state.stage === 'build') {
-    side.append(el('p', { class: 'prompt', text: 'How many tiles?' }));
-    side.append(el('p', { class: 'hint-text', text: 'Tap squares to build step 4. Then check.' }));
+  if (state.stage === 'compare') {
+    promptEl.textContent = 'Same total. Same pattern?';
+    subEl.textContent = 'Look at your arrangement beside the shown pattern.';
+    side.append(el('p', { class: 'prompt', text: 'Compare the shapes' }));
+    side.append(el('p', { text: 'You have the right number of tiles. The arrangement is different. Explain what you changed.' }));
     const actions = el('div', { class: 'actions' });
-    actions.append(button('Check', { primary: true, onClick: checkBuild }));
-    actions.append(button('Clear', { quiet: true, onClick: () => { state.built.clear(); renderGrow(); } }));
+    actions.append(button('Revise my build', { primary: true, onClick: () => {
+      state.stage = 'build';
+      promptEl.textContent = `Build step ${state.buildStep}.`;
+      subEl.textContent = 'Your tiles are still here. Change their arrangement and check again.';
+      renderGrow();
+    } }));
+    actions.append(button('Keep my arrangement', { onClick: () => {
+      state.alternateKept = true;
+      startPredictions();
+      feedback.set('info', 'Your arrangement is kept. Now predict the totals in the shown pattern.');
+    } }));
     side.append(actions);
     feedback = feedbackEl(side);
     return;
   }
+  if (state.stage === 'build') {
+    const controls = el('div', { class: 'pattern-build-controls' });
+    controls.append(el('p', { class: 'hint-text', text: 'Check your shape and total.' }));
+    const actions = el('div', { class: 'actions' });
+    actions.append(button('Check', { primary: true, onClick: checkBuild }));
+    actions.append(button('Clear', { quiet: true, onClick: () => { state.built.clear(); renderGrow(); } }));
+    controls.append(actions);
+    feedback = feedbackEl(controls);
+    board.append(controls);
+    return;
+  }
   const askStep = state.preset.predict[state.predictIdx];
   if (state.stage === 'predict' && askStep !== undefined) {
+    promptEl.textContent = 'Predict the next totals.';
+    subEl.textContent = 'Use the shown pattern. Your arrangement stays on the board.';
     side.append(el('p', { class: 'prompt', text: `How many tiles at step ${askStep}?` }));
     side.append(valuesTable(askStep));
     const pad = keypad({ onDone: (v) => checkPredict(v), maxDigits: 4 });
@@ -175,6 +236,8 @@ function renderGrowSide() {
     return;
   }
   side.append(el('p', { class: 'prompt', text: 'The rule' }));
+  promptEl.textContent = 'Explain the rule.';
+  subEl.textContent = 'Show how the pattern grows. Compare it with your arrangement.';
   side.append(valuesTable());
   if (state.preset.showRule || state.support === 'full') side.append(el('p', { text: p.ruleWords }));
   const actions = el('div', { class: 'actions' });
@@ -185,15 +248,26 @@ function renderGrowSide() {
 
 function checkBuild() {
   const p = state.pattern;
-  const j = judgeBuild(p, state.buildStep, state.built.size);
+  const j = judgeArrangement(p, state.buildStep, learnerCells());
   if (j.correct) {
-    state.stage = 'predict';
+    state.alternateKept = false;
+    startPredictions();
+    feedback.set('ok', `Your shape and total match the shown pattern: ${j.expected} tiles.`, p.nonlinear ? 'The orange column is new at this step. The next column will be one taller.' : `Each step adds ${p.a} tiles.`);
+  } else if (j.countCorrect) {
+    state.stage = 'compare';
+    state.compared = true;
     state.partsShown = true;
     renderGrow();
-    feedback.set('ok', buildMessage(p, state.buildStep, state.built.size), 'Blue tiles stay the same. Orange tiles are added each step.');
+    feedback.set('info', 'The total matches. Compare the arrangements before you continue.');
   } else {
     feedback.set('try', buildMessage(p, state.buildStep, state.built.size) + ' Adjust your build and check again.');
   }
+}
+
+function startPredictions() {
+  state.stage = 'predict';
+  state.partsShown = true;
+  renderGrow();
 }
 
 function checkPredict(v) {
@@ -214,9 +288,9 @@ function checkPredict(v) {
 function addTalk() {
   talkBox.innerHTML = '';
   talkBox.append(talkPrompts([
-    'Which tiles never change? Which tiles get added?',
+    state.pattern.nonlinear ? 'How many tiles does the next column add? What changes each time?' : 'Which tiles stay? Which tiles get added?',
     `How would you work out step 100 without drawing it?`,
-    'Can you make a different pattern that grows by the same amount?',
+    'Can you arrange the same totals in a different way? Explain your rule.',
   ]));
 }
 
@@ -287,7 +361,7 @@ function hint() {
   state.partsShown = true;
   renderGrow();
   const p = state.pattern;
-  feedback.set('info', p.nonlinear ? 'Orange shows the column added at this step. Each new column is one taller.' : `Blue tiles stay. Orange tiles are new. Each step adds ${p.a}.`);
+  feedback.set('info', p.nonlinear ? 'Orange shows the column added at this step. Each new column is one taller.' : `${p.b > 0 ? 'Blue marks the fixed part. ' : ''}Orange marks the part that grows. Each step adds ${p.a} tiles.`);
 }
 
 function reveal() {
@@ -300,6 +374,7 @@ function reveal() {
   }
   const p = state.pattern;
   state.stage = 'rule';
+  state.revealed = true;
   state.predictIdx = state.preset.predict.length;
   state.partsShown = true;
   renderGrow();
@@ -335,3 +410,21 @@ function drawerContent() {
 }
 
 newRound();
+
+window.render_game_to_text = () => JSON.stringify({
+  activity: 'grow-the-pattern',
+  preset: state.preset.id,
+  stage: state.stage,
+  pattern: state.pattern?.id || null,
+  buildStep: state.buildStep,
+  coordinateSystem: 'x increases right; y increases up',
+  built: learnerCells(),
+  expectedCells: state.pattern?.cells(state.buildStep) || [],
+  compared: state.compared,
+  alternateKept: state.alternateKept,
+  revealed: state.revealed,
+  predictStep: state.preset.predict?.[state.predictIdx] || null,
+  shown: state.shown,
+  slots: state.slots,
+  feedback: feedback?.el.textContent || '',
+});

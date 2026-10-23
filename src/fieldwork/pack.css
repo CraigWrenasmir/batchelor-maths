@@ -1,0 +1,121 @@
+.pack-activity { color: var(--ink, #183a32); max-width: 1040px; margin: 0 auto; }
+.pack-activity button { font: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.pack-activity button:disabled { cursor: default; opacity: .4; }
+.pack-activity button:focus-visible, .pack-title:focus-visible { outline: 3px solid var(--blue, #385f87); outline-offset: 4px; }
+.pack-activity [hidden] { display: none !important; }
+.pack-heading { margin: 0 0 22px; }
+.pack-step { font-size: 12px; font-weight: 800; letter-spacing: .11em; color: var(--muted, #65736c); margin: 0 0 8px; }
+.pack-title { font-size: clamp(24px, 3vw, 34px); line-height: 1.15; letter-spacing: -.025em; margin: 0 0 10px; }
+.pack-title:focus { outline: none; }
+.pack-instruction { font-size: clamp(16px, 1.8vw, 20px); line-height: 1.5; max-width: 760px; margin: 0; }
+.pack-workspace { display: grid; grid-template-columns: 135px minmax(0, 1fr); gap: 20px; align-items: stretch; }
+.pack-request { border: 1px solid var(--line, #d6d8ca); border-radius: 20px; padding: 22px 15px; text-align: center; background: #eeeede; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 245px; }
+.pack-request-label { font-size: 11px; font-weight: 800; letter-spacing: .12em; color: var(--muted, #65736c); }
+.pack-request-number { font-size: clamp(52px, 7vw, 78px); font-weight: 700; letter-spacing: -.055em; line-height: 1.18; font-variant-numeric: tabular-nums; }
+.pack-request-word { font-size: 14px; color: var(--muted, #65736c); }
+.pack-target-dots { display: grid; grid-template-columns: repeat(5, 9px); gap: 6px; margin-top: 18px; }
+.pack-target-dot { width: 9px; height: 9px; background: var(--green, #245845); border-radius: 50%; }
+.pack-trays { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.pack-tray { background: #fffdf5; border: 2px solid #c6d5c5; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; min-width: 0; }
+.pack-tray-b { border-color: #d9c9b3; }
+.pack-tray-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pack-tray-header h3 { font-size: 17px; margin: 0; font-weight: 700; }
+.pack-tray-count { display: inline-flex; justify-content: center; align-items: center; min-width: 40px; min-height: 36px; padding: 0 8px; border-radius: 10px; background: #eaf0e4; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pack-tray-b .pack-tray-count { background: #f3e9da; }
+.pack-objects { min-height: 120px; flex: 1; display: flex; align-content: flex-start; align-items: flex-start; flex-wrap: wrap; gap: 8px; padding: 20px 0; }
+.pack-object { width: 33px; height: 33px; border-radius: 50%; border: 2px solid #214c3b; background: #d6e7ba; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; color: #183a32; font-weight: 700; box-shadow: inset 0 0 0 4px #edf2d6; }
+.pack-tray-b .pack-object { background: #efcba5; border-color: #805432; box-shadow: inset 0 0 0 4px #f6e5d0; }
+.pack-object-shapes { border-radius: 7px; box-shadow: none !important; }
+.pack-empty { width: 100%; color: var(--muted, #65736c); align-self: center; text-align: center; font-size: 14px; margin: auto; padding: 20px 0; }
+.pack-tray-controls { border-top: 1px solid var(--line, #d6d8ca); padding-top: 14px; display: flex; justify-content: space-between; gap: 6px; align-items: center; }
+.pack-tray-controls > span { font-size: 11px; color: var(--muted, #65736c); text-align: center; }
+.pack-step-button { width: 52px; min-width: 52px; height: 52px; border: 1px solid #bac7b8; border-radius: 13px; color: var(--ink, #183a32); background: #f0f3e7; font-size: 29px !important; line-height: 1; }
+.pack-step-button:not(:disabled):hover { background: #e4ecd8; border-color: var(--green, #245845); }
+.pack-step-button:not(:disabled):active { transform: scale(.97); }
+.pack-creator { display: flex; align-items: center; justify-content: flex-start; gap: 14px; padding: 14px 0 20px; }
+.pack-creator > span { font-weight: 600; margin-right: 8px; }
+.pack-create-value { min-width: 28px; text-align: center; font-size: 24px; font-weight: 700; }
+.pack-previous { margin: 0 0 15px; padding: 12px 16px; border-left: 3px solid #728d6e; background: #eef1e5; line-height: 1.5; font-size: 15px; }
+.pack-transfers { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 16px 0 12px; flex-wrap: wrap; }
+.pack-transfer-label { font-size: 13px; color: var(--muted, #65736c); margin-right: 8px; }
+.pack-move-button { min-width: 90px; min-height: 48px; border: 1px solid #c4cbbd; background: #fafbf2; color: var(--ink, #183a32); border-radius: 12px; font-weight: 700 !important; }
+.pack-move-button:not(:disabled):hover { background: #e8eddf; }
+.pack-equation { text-align: center; font-size: clamp(20px, 3vw, 27px); margin: 14px 0 8px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.pack-limit-note { text-align: center; font-size: 12px; color: var(--muted, #65736c); line-height: 1.5; margin: 9px 0 18px; }
+.pack-feedback { border-left: 4px solid #94744e; background: #f3ecdf; border-radius: 0 10px 10px 0; padding: 14px 18px; font-size: 16px; line-height: 1.55; margin: 18px 0; }
+.pack-feedback.is-success { border-left-color: var(--green, #245845); background: #e8efdf; }
+.pack-feedback.is-revealed { border-left-color: var(--blue, #385f87); background: #e9eff3; }
+.pack-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 3px 0 8px; }
+.pack-primary, .pack-next { border: 1px solid var(--green, #245845); border-radius: 14px; min-height: 54px; min-width: 170px; padding: 12px 24px; font-weight: 700 !important; }
+.pack-primary { background: var(--green, #245845); color: #fffdf5; }
+.pack-next { background: transparent; color: var(--green, #245845); }
+.pack-primary:not(:disabled):hover { filter: brightness(1.12); }
+.pack-next:not(:disabled):hover { background: #e7ecdc; }
+.pack-help-panel { border: 1px solid #b8c7ce; background: #eef2f0; border-radius: 16px; padding: 20px; margin-top: 22px; }
+.pack-help-title { font-size: 18px; margin: 0 0 10px; }
+.pack-help-body { line-height: 1.6; font-size: 16px; }
+.pack-help-body p { margin: 0 0 12px; }
+.pack-help-close { border: 1px solid #b5c4bd; background: #fbfcf5; color: var(--ink, #183a32); padding: 10px 20px; min-height: 48px; border-radius: 10px; font-weight: 600 !important; }
+.pack-mini-example { display: flex; gap: 12px; margin-bottom: 16px; }
+.pack-mini-tray { border: 1px solid #bccbbb; padding: 12px; border-radius: 10px; flex: 1; background: #fffdf5; }
+.pack-mini-tray strong { display: block; font-size: 14px; margin-bottom: 8px; }
+.pack-mini-pieces { display: flex; flex-wrap: wrap; gap: 6px; }
+body.classroom .pack-title { font-size: clamp(30px, 3vw, 40px); }
+body.classroom .pack-instruction { font-size: clamp(20px, 2vw, 25px); max-width: 1000px; }
+body.classroom .pack-tray-header h3 { font-size: 21px; }
+body.classroom .pack-tray-count { font-size: 29px; min-width: 48px; min-height: 42px; }
+body.classroom .pack-object { width: 41px; height: 41px; font-size: 16px; }
+body.classroom .pack-step-button { min-width: 58px; width: 58px; height: 58px; font-size: 33px !important; }
+body.classroom .pack-move-button { min-width: 112px; min-height: 56px; font-size: 21px !important; }
+body.classroom .pack-primary, body.classroom .pack-next { min-height: 60px; font-size: 22px !important; }
+body.classroom .pack-transfer-label, body.classroom .pack-previous { font-size: 17px; }
+body.classroom .pack-limit-note { font-size: 14px; }
+body.classroom .pack-feedback, body.classroom .pack-help-body { font-size: 20px; }
+body.classroom .pack-equation { font-size: 30px; }
+@media (min-width: 900px) and (max-height: 900px) {
+  body.classroom .pack-heading { margin-bottom: 14px; }
+  body.classroom .pack-title { font-size: 30px; margin-bottom: 6px; }
+  body.classroom .pack-instruction { font-size: 21px; line-height: 1.35; }
+  body.classroom .pack-request { min-height: 210px; padding: 16px 12px; }
+  body.classroom .pack-objects { min-height: 100px; padding: 12px 0; gap: 7px; }
+  body.classroom .pack-tray { padding: 12px 16px; }
+  body.classroom .pack-tray-controls { padding-top: 10px; }
+  body.classroom .pack-transfers { margin: 10px 0 6px; }
+  body.classroom .pack-equation { margin: 8px 0 4px; }
+  body.classroom .pack-limit-note { margin: 5px 0 10px; }
+}
+@media (min-width: 1500px) {
+  .pack-activity { max-width: 1220px; }
+  .pack-workspace { grid-template-columns: 155px minmax(0, 1fr); }
+  .pack-tray { padding: 24px; }
+  .pack-objects { min-height: 175px; gap: 10px; }
+  .pack-object { width: 41px; height: 41px; font-size: 16px; }
+}
+@media (max-width: 680px) {
+  .pack-workspace { grid-template-columns: 1fr; gap: 14px; }
+  .pack-request { min-height: 0; padding: 13px 18px; flex-direction: row; gap: 10px; justify-content: flex-start; border-radius: 15px; }
+  .pack-request-number { font-size: 40px; margin-left: 4px; }
+  .pack-request-word { margin-right: auto; }
+  .pack-target-dots { margin: 0 0 0 8px; gap: 4px; grid-template-columns: repeat(5, 7px); }
+  .pack-target-dot { width: 7px; height: 7px; }
+  .pack-trays { gap: 10px; }
+  .pack-tray { padding: 12px; border-radius: 15px; }
+  .pack-objects { gap: 5px; min-height: 132px; padding: 14px 0; }
+  .pack-object { width: 28px; height: 28px; font-size: 11px; box-shadow: inset 0 0 0 3px #edf2d6; }
+  .pack-tray-b .pack-object { box-shadow: inset 0 0 0 3px #f6e5d0; }
+  .pack-tray-header h3 { font-size: 15px; }
+  .pack-step-button { min-width: 48px; width: 48px; height: 48px; }
+  .pack-tray-controls > span { display: none; }
+  .pack-transfer-label { width: 100%; text-align: center; margin-right: 0; }
+  .pack-creator { gap: 8px; flex-wrap: wrap; }
+  .pack-creator > span { width: 100%; }
+  .pack-primary, .pack-next { min-width: 140px; padding: 12px 16px; }
+  body.classroom .pack-object { width: 30px; height: 30px; font-size: 12px; }
+  body.classroom .pack-step-button { min-width: 48px; width: 48px; height: 52px; }
+  body.classroom .pack-tray-header h3 { font-size: 17px; }
+  body.classroom .pack-tray-count { font-size: 24px; min-width: 40px; }
+  body.classroom .pack-primary, body.classroom .pack-next { font-size: 18px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pack-activity * { transition: none !important; animation: none !important; }
+}

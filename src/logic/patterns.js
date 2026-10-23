@@ -102,13 +102,33 @@ export function judgeBuild(pattern, n, builtCount) {
   return { expected, diff, correct: diff === 0 };
 }
 
+// Moving the same arrangement on the board is still the same pattern. Turning
+// it or merely using the same number of tiles does not match the shown shape.
+export function sameShape(left, right) {
+  if (left.length !== right.length) return false;
+  if (left.length === 0) return true;
+  const normalise = (cells) => {
+    const b = bounds(cells);
+    return cells.map(({ x, y }) => `${x - b.minX},${y - b.minY}`).sort().join(';');
+  };
+  return normalise(left) === normalise(right);
+}
+
+export function judgeArrangement(pattern, n, builtCells) {
+  const count = judgeBuild(pattern, n, builtCells.length);
+  const shapeMatches = count.correct && sameShape(builtCells, pattern.cells(n));
+  return { ...count, countCorrect: count.correct, shapeMatches, correct: shapeMatches };
+}
+
 export function buildMessage(pattern, n, builtCount) {
   const j = judgeBuild(pattern, n, builtCount);
-  if (j.correct) return `Yes. Step ${n} has ${j.expected} tiles. ${pattern.rule(n)}.`;
+  if (j.correct) return `The total matches: ${j.expected} tiles. Compare how the tiles are arranged.`;
   const prev = countAt(pattern, n - 1);
   const add = j.expected - prev;
-  if (j.diff > 0) return `You used ${builtCount}. Step ${n} has ${j.expected}. Step ${n - 1} had ${prev}, and each step adds ${add}.`;
-  return `You used ${builtCount}. Step ${n} has ${j.expected}. Step ${n - 1} had ${prev}, and each step adds ${add}.`;
+  const growth = pattern.nonlinear
+    ? `Moving from step ${n - 1} to step ${n} adds ${add}. The next new column will be one taller.`
+    : `Each step adds ${add}.`;
+  return `You used ${builtCount}. Step ${n} has ${j.expected}. Step ${n - 1} had ${prev}. ${growth}`;
 }
 
 export function predictMessage(pattern, n, answer) {

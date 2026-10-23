@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { makeRng } from '../src/logic/rng.js';
-import { chooseScene, layoutScene, judgeEstimate, describeCount, placeValueText, tally, estimateMessage } from '../src/logic/howmany.js';
+import { chooseScene, layoutScene, judgeEstimate, describeCount, placeValueText, tally, estimateMessage, countGroups, addGroup, checkTotal } from '../src/logic/howmany.js';
 import { HOW_MANY_PRESETS } from '../content/how-many.js';
 
 test('every preset generates quantities inside its range for many seeds', () => {
@@ -67,4 +67,43 @@ test('place value text and tally', () => {
   assert.equal(placeValueText(7), '7 ones is 7.');
   assert.equal(placeValueText(110), '1 hundred and 1 ten is 110.');
   assert.deepEqual(tally(23, 10), { groups: 2, rest: 3 });
+});
+
+test('whole-group counting covers arrays and partial groups without double counting', () => {
+  const scene = { n: 23, arrangement: 'groups', groupSize: 5, groups: 4, remainder: 3 };
+  const groups = countGroups(layoutScene(scene, makeRng(7)), 'groups');
+  assert.deepEqual(groups.map((g) => g.ids.length), [5, 5, 5, 5, 3]);
+  let marked = [groups[0].ids[0], groups[0].ids[1]];
+  marked = addGroup(marked, groups[0].ids);
+  assert.equal(marked.length, 5, 'only three objects remain in this partially counted group');
+  assert.deepEqual(addGroup(marked, groups[0].ids), marked, 'tapping a counted group cannot inflate the total');
+  for (const group of groups) marked = addGroup(marked, group.ids);
+  assert.equal(marked.length, 23);
+
+  const arrayGroups = countGroups(layoutScene({ n: 24, arrangement: 'rows', rows: 4, cols: 6 }, makeRng(1)), 'rows');
+  assert.deepEqual(arrayGroups.map((g) => g.ids.length), [6, 6, 6, 6]);
+  assert.equal(new Set(arrayGroups.flatMap((g) => g.ids)).size, 24);
+  assert.deepEqual(countGroups(layoutScene({ n: 9, arrangement: 'scatter' }, makeRng(2)), 'scatter'), []);
+});
+
+test('exact-total answers stay retryable and do not reveal a hidden total', () => {
+  assert.equal(checkTotal(87, 87).correct, true);
+  for (const answer of [0, 86, 88, 999]) {
+    const result = checkTotal(answer, 87);
+    assert.equal(result.correct, false);
+    assert.ok(!result.message.includes('87'), 'a wrong answer does not reveal the correct total');
+  }
+  assert.match(checkTotal(86, 87).message, /more/);
+  assert.match(checkTotal(88, 87).message, /fewer/);
+  assert.equal(checkTotal(NaN, 87).correct, false);
+  assert.equal(checkTotal(-1, 87).correct, false);
+});
+
+test('regrouping a scattered collection preserves every object identity', () => {
+  for (const n of [3, 10, 21, 53, 120]) {
+    const original = layoutScene({ n, arrangement: 'scatter' }, makeRng(n));
+    const grouped = layoutScene({ n, arrangement: 'groups', groupSize: 10, groups: Math.floor(n / 10), remainder: n % 10 }, makeRng(n));
+    assert.deepEqual(grouped.items.map((i) => i.id), original.items.map((i) => i.id));
+    assert.equal(countGroups(grouped, 'groups').flatMap((g) => g.ids).length, n);
+  }
 });

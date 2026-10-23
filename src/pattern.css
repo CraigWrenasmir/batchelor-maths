@@ -1,0 +1,55 @@
+/* Keep the build area large enough to touch without shrinking its squares. */
+.pattern-activity { --pattern-cell-size: 48px; }
+html[data-mode="class"] .pattern-activity { --pattern-cell-size: 56px; }
+.pattern-activity .panel, .pattern-activity .two-col > * { min-width: 0; }
+.pattern-activity .steps { margin-bottom: var(--gap); }
+.pattern-activity .step { max-width: 100%; }
+.pattern-activity .step.build { width: 100%; min-width: 0; }
+.pattern-grid {
+  width: 100%; max-width: 100%; overflow-x: auto; padding: 4px 0 8px;
+  overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+}
+.pattern-grid svg {
+  width: calc(var(--grid-cols) * var(--pattern-cell-size) + 8px);
+  height: auto; max-width: none; margin-inline: auto; flex-shrink: 0;
+}
+.pattern-grid:focus-visible, .values-wrap:focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 3px;
+}
+.pattern-activity .grid-scroll-hint { margin: 6px auto 10px; max-width: 48ch; }
+.pattern-comparison { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: start; }
+.pattern-comparison .step { flex: 1 1 190px; }
+.pattern-comparison svg { margin-inline: auto; max-width: 100%; }
+.values-wrap { width: 100%; max-width: 100%; overflow-x: auto; padding: 0 0 8px; }
+.pattern-activity .values { width: 100%; font-size: 1em; }
+.pattern-activity .values th, .pattern-activity .values td { padding: 6px 8px; min-width: 2.4em; }
+.pattern-build-controls { margin-top: var(--gap); }
+.pattern-activity .building-layout { grid-template-columns: minmax(0, 1fr) !important; }
+@media (max-width: 1300px) {
+  html .pattern-activity .two-col,
+  html[data-mode="class"] .pattern-activity .two-col { grid-template-columns: minmax(0, 1fr); }
+}
+/* The examples and controls can share the space beside the large touch grid.
+   Keep the interactive cells full size even when the examples are compact. */
+@media (min-width: 1000px) {
+  .pattern-main-building {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: 24px;
+    align-items: start;
+  }
+  .pattern-main-building > #prompt { grid-column: 1; grid-row: 1; }
+  .pattern-main-building > #sub { grid-column: 1; grid-row: 2; }
+  .pattern-main-building .pattern-board { display: contents; }
+  .pattern-main-building .steps {
+    grid-column: 1; grid-row: 3; align-items: flex-end; margin-block: var(--gap);
+    --preview-tile-size: 24px;
+  }
+  .pattern-main-building .step.build {
+    grid-column: 2; grid-row: 1 / span 4; width: auto; max-width: none;
+  }
+  .pattern-main-building .pattern-grid { width: auto; }
+  .pattern-main-building .grid-scroll-hint { display: none; }
+  .pattern-main-building .pattern-build-controls { grid-column: 1; grid-row: 4; }
+}

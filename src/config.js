@@ -6,9 +6,9 @@ export const school = {
   // Replace with the school's own logo file (SVG or PNG) once supplied.
   // Leave as '' to show the wordmark only.
   logo: 'assets/logo-placeholder.svg',
-  logoAlt: 'School logo',
-  collectionTitle: 'Maths investigations',
-  tagline: 'Estimate, place, build, explain.',
+  logoAlt: 'Maths sampler mark',
+  collectionTitle: 'Maths sampler',
+  tagline: 'Count, pack, find, place, build. Choose an investigation.',
   // Short acknowledgement shown on the home page. Wording should be checked
   // and approved by the school and community before public use.
   acknowledgement: 'Batchelor Area School is on the Country of the Kungarakan and Warai peoples.',

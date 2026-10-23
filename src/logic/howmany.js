@@ -150,3 +150,34 @@ export function placeValueText(n) {
 export function tally(countSoFar, groupSize) {
   return { groups: Math.floor(countSoFar / groupSize), rest: countSoFar % groupSize };
 }
+
+// Groups refer to what is actually drawn, so a partial group never adds a
+// full five or ten and mixed one-by-one / group counting cannot double-count.
+export function countGroups(layout, arrangement) {
+  const key = arrangement === 'rows' ? 'row' : arrangement === 'groups' ? 'group' : null;
+  if (!key) return [];
+  const groups = new Map();
+  for (const item of layout.items) {
+    if (!groups.has(item[key])) groups.set(item[key], []);
+    groups.get(item[key]).push(item.id);
+  }
+  return [...groups.entries()].sort(([a], [b]) => a - b)
+    .map(([id, ids]) => ({ id, ids }));
+}
+
+export function addGroup(marked, ids) {
+  return [...new Set([...marked, ...ids])];
+}
+
+// An exact total is separate from an estimate. A retry gives a direction,
+// never the answer, so learners still have something to work out.
+export function checkTotal(answer, n) {
+  if (!Number.isInteger(answer) || answer < 0) return { correct: false, message: 'Enter a whole number, then check it.' };
+  if (answer === n) return { correct: true, message: `Yes, there are ${n}.` };
+  return {
+    correct: false,
+    message: answer < n
+      ? 'There are more than that. Look for a missed object or group, then try again.'
+      : 'There are fewer than that. Check that each object or group is counted once, then try again.',
+  };
+}

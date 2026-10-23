@@ -102,7 +102,7 @@ function renderCards() {
   for (const c of state.cards) {
     const b = el('button', { class: `card${state.placed[c.id] !== undefined ? ' placed' : ''}`, type: 'button', 'aria-pressed': String(state.current === c.id) });
     b.innerHTML = cardFace(c);
-    b.addEventListener('click', () => { state.current = c.id; renderCards(); renderLine(); });
+    b.addEventListener('click', () => { state.current = c.id; renderCards(); renderLine(); renderActions(); });
     cardsEl.append(b);
   }
 }
@@ -184,7 +184,6 @@ function pointerValue(e) {
 
 let dragging = false;
 lineSvg.addEventListener('pointerdown', (e) => {
-  if (state.game === 'place' && state.checked >= 2) return;
   dragging = true;
   lineSvg.setPointerCapture(e.pointerId);
   setPosition(pointerValue(e));
@@ -204,7 +203,7 @@ lineSvg.addEventListener('keydown', (e) => {
   else if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
     if (state.game === 'mystery') guess();
-    else { const next = state.cards.find((c) => state.placed[c.id] === undefined); if (next) { state.current = next.id; renderCards(); renderLine(); } }
+    else { const next = state.cards.find((c) => state.placed[c.id] === undefined); if (next) { state.current = next.id; renderCards(); renderLine(); renderActions(); } }
   }
 });
 
@@ -214,7 +213,7 @@ function setPosition(v) {
   } else {
     if (state.current === null) return;
     const c = state.cards.find((x) => x.id === state.current);
-    if (c.grade === 'spot' || c.grade === 'close' || c.revealed) return; // locked once confirmed
+    if (c.grade === 'spot' || c.revealed) return; // only exact or explicitly revealed answers lock
     state.placed[state.current] = v;
     c.grade = '';
   }
@@ -225,6 +224,21 @@ function setPosition(v) {
 
 function renderActions() {
   actionsEl.innerHTML = '';
+  const current = state.game === 'mystery' ? state.pending : state.placed[state.current];
+  const locked = state.game === 'mystery' ? state.guesses.some(g => g.verdict === 'found') : state.cards.find(c => c.id === state.current)?.grade === 'spot';
+  const adjust = el('div', { class: 'line-adjust' });
+  const shift = direction => {
+    const start = current ?? snapValue((state.preset.min + state.preset.max) / 2, state.preset);
+    setPosition(snapValue(start + direction * (state.preset.resolution ?? 1), state.preset));
+    // Re-rendering the controls must not strand keyboard users.
+    actionsEl.querySelector(direction < 0 ? '[data-adjust="left"]' : '[data-adjust="right"]')?.focus();
+  };
+  for (const [direction, name] of [[-1, 'left'], [1, 'right']]) {
+    const b = button(`Move ${name}`, { quiet: true, onClick: () => shift(direction) });
+    b.dataset.adjust = name; b.disabled = locked; adjust.append(b);
+  }
+  adjust.append(el('span', { class: 'small', text: current == null ? 'Tap the line, or use Move left / right.' : `Marker at ${formatValue(current, state.preset)}` }));
+  actionsEl.append(adjust);
   if (state.game === 'mystery') {
     const g = button(state.pending === null ? 'Tap the line to choose a guess' : `Guess ${formatValue(state.pending, state.preset)}`, { primary: true, onClick: guess });
     g.disabled = state.pending === null || state.guesses.some((x) => x.verdict === 'found');
@@ -234,7 +248,7 @@ function renderActions() {
   }
   const allPlaced = state.cards.every((c) => state.placed[c.id] !== undefined);
   const check = button(state.checked === 0 ? 'Check' : 'Check again', { primary: true, onClick: check_ });
-  check.disabled = !allPlaced || state.checked >= 2 || state.cards.every((c) => c.grade === 'spot' || c.grade === 'close');
+  check.disabled = !allPlaced || state.cards.every((c) => c.grade === 'spot');
   actionsEl.append(check);
   actionsEl.append(button('Next', { quiet: true, onClick: () => newRound() }));
 }
@@ -246,18 +260,19 @@ function check_() {
   let good = 0;
   for (const { c, j } of results) {
     c.grade = j.grade;
-    if (j.grade !== 'off' || state.checked >= 2) { c.showTruth = true; c.revealed = true; }
-    if (j.grade !== 'off') good += 1;
+    c.showTruth = j.grade === 'spot' || state.checked >= 2;
+    if (j.grade === 'spot') good += 1;
   }
   renderLine(); renderCards(); renderActions();
   const worst = results.slice().sort((a, b) => b.j.errorFrac - a.j.errorFrac)[0];
-  const summary = good === state.cards.length ? `All ${good} placed well.` : `${good} of ${state.cards.length} placed well.`;
+  const close = results.filter(({j}) => j.grade === 'close').length;
+  const summary = good === state.cards.length ? `All ${good} exactly placed.` : `${good} of ${state.cards.length} exactly placed.${close ? ` ${close} close: keep adjusting.` : ''}`;
   if (good === state.cards.length) {
     feedback.set('ok', summary, benchmarkText(worst.c.value, p));
   } else if (state.checked < 2) {
-    feedback.set('try', `${summary} ${placementMessage(worst.c, state.placed[worst.c.id], p)} Move the dashed ones and check again.`);
+    feedback.set('try', `${summary} ${placementMessage(worst.c, state.placed[worst.c.id], p)} Choose an unfinished card. Move it and check again.`);
   } else {
-    feedback.set('info', `${summary} The green triangles show where each number belongs.`, placementMessage(worst.c, state.placed[worst.c.id], p));
+    feedback.set('info', `${summary} The green triangles show the exact positions. You can move the unfinished cards and check again.`, placementMessage(worst.c, state.placed[worst.c.id], p));
   }
   if (good === state.cards.length || state.checked >= 2) {
     talkBox.innerHTML = '';
@@ -344,4 +359,5 @@ function drawerContent() {
 }
 
 window.addEventListener('resize', renderLine);
+window.render_game_to_text = () => JSON.stringify({activity:'where-does-it-go', preset:state.preset.id, game:state.game, cards:state.cards.map(c=>({id:c.id,value:c.value,placed:state.placed[c.id],grade:c.grade||null,revealed:!!c.revealed})), current:state.current, checked:state.checked, pending:state.pending, interval:state.interval, guesses:state.guesses, instruction:promptEl.textContent+' '+subEl.textContent});
 newRound();

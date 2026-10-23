@@ -1,6 +1,7 @@
 // Shared shell: URL settings, delivery mode, optional sound, feedback,
 // fullscreen and the "new learner" reset. No performance data is stored.
 import { school } from './config.js';
+import { demoFor } from './demos.js';
 
 export const params = new URLSearchParams(location.search);
 
@@ -21,24 +22,25 @@ export function currentMode() {
 export function applyMode(mode) {
   document.documentElement.dataset.mode = mode;
   store.set('bas-mode', mode);
+  window.dispatchEvent(new CustomEvent('sampler-mode-change',{detail:{mode}}));
 }
 
 // Sound: off unless the user turns it on. Uses the device's speech voice for
 // numbers and instructions only. Never used to reveal a hidden answer.
 let soundOn = setting('sound', store.get('bas-sound') || 'off') === 'on';
-export function speak(text) {
-  if (!soundOn) return;
+export function speak(text, { force = false, onError = () => {} } = {}) {
+  if (!force && !soundOn) return;
   try {
-    if (!('speechSynthesis' in window)) return;
+    if (!soundAvailable()) { onError(); return; }
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-AU';
-    u.rate = 0.95;
+    u.lang = 'en-AU'; u.rate = 0.9;
+    u.onerror = e => { if (!['canceled', 'interrupted'].includes(e.error)) onError(); };
     window.speechSynthesis.speak(u);
-  } catch { /* audio blocked or unavailable: visible text remains */ }
+  } catch { onError(); }
 }
 export function soundAvailable() {
-  return typeof window !== 'undefined' && 'speechSynthesis' in window;
+  return typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 }
 
 let liveRegion;
@@ -52,6 +54,7 @@ export function mountShell({ title, activity, onNewLearner, teacherControls = []
   document.title = `${title} · ${school.name}`;
   const mode = currentMode();
   applyMode(mode);
+  let instructionReader = null, exampleAction = null, drawerContent = null;
   const root = document.getElementById('app');
   root.className = 'app';
   root.innerHTML = `
@@ -59,92 +62,103 @@ export function mountShell({ title, activity, onNewLearner, teacherControls = []
       <a class="bar-btn" href="../index.html" aria-label="Home">⌂ <span>Home</span></a>
       <h1 class="title">${title}</h1>
       <div class="tools">
-        <button class="bar-btn" id="btn-sound" aria-pressed="${soundOn}" ${soundAvailable() ? '' : 'disabled title="Speech is not available on this device"'}>🔈 <span>Sound</span></button>
         <button class="bar-btn" id="btn-mode" aria-pressed="${mode === 'class'}">▭ <span>Big screen</span></button>
         <button class="bar-btn" id="btn-full">⤢ <span>Full screen</span></button>
         <button class="bar-btn" id="btn-setup">⚙ <span>Set up</span></button>
         <button class="bar-btn" id="btn-new">↺ <span>New learner</span></button>
       </div>
     </header>
+    <nav class="help-bar" aria-label="Activity help">
+      <button class="btn btn-quiet" id="btn-listen">Listen</button>
+      <button class="btn btn-quiet" id="btn-example">Show me</button>
+      <button class="btn btn-quiet" id="btn-sound" aria-pressed="${soundOn}">Read feedback</button>
+      <span class="small muted" id="audio-status" role="status"></span>
+    </nav>
     <main class="stage" id="stage"></main>
     <footer class="teacher-bar" id="teacher-bar" hidden></footer>
     <div class="visually-hidden" aria-live="polite" id="live"></div>
-    <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title"><div class="sheet" id="sheet"></div></div>
+    <dialog class="drawer" id="drawer" aria-labelledby="drawer-title"><div class="sheet" id="sheet"></div></dialog>
+    <dialog class="example-dialog" id="example-dialog" aria-labelledby="example-title"></dialog>
   `;
   liveRegion = root.querySelector('#live');
-
-  root.querySelector('#btn-sound').addEventListener('click', (e) => {
-    soundOn = !soundOn;
-    e.currentTarget.setAttribute('aria-pressed', String(soundOn));
+  const stage = root.querySelector('#stage');
+  const stopSpeech = () => { try { window.speechSynthesis?.cancel(); } catch {} };
+  const audioStatus = root.querySelector('#audio-status');
+  const audioError = () => { audioStatus.textContent = 'Voice is unavailable here. Use the pictures and on-screen instructions.'; };
+  const visibleText = selectors => [...stage.querySelectorAll(selectors)].filter(e => e.getClientRects().length && !e.closest('[hidden]')).map(e=>e.textContent.trim()).filter(Boolean).join(' ');
+  const readInstruction = () => instructionReader?.() || visibleText('.prompt, .hint-text') || title;
+  root.querySelector('#btn-listen').onclick = () => {
+    audioStatus.textContent = '';
+    speak(readInstruction(), {force:true, onError:audioError});
+  };
+  root.querySelector('#btn-sound').onclick = e => {
+    soundOn = !soundOn; e.currentTarget.setAttribute('aria-pressed', String(soundOn));
     store.set('bas-sound', soundOn ? 'on' : 'off');
-    if (soundOn) speak('Sound is on.');
-  });
-  root.querySelector('#btn-mode').addEventListener('click', (e) => {
+    if (soundOn) speak('Feedback will be read aloud.', {onError:audioError}); else stopSpeech();
+  };
+  if (!soundAvailable()) audioError();
+  const exampleDialog = root.querySelector('#example-dialog');
+  root.querySelector('#btn-example').onclick = () => {
+    stopSpeech();
+    if (exampleAction) { exampleAction(); return; }
+    exampleDialog.innerHTML = `<h2 id="example-title">Show me: ${title}</h2><p class="muted">An example to try together.</p>${demoFor(activity)}<div class="actions"><button class="btn" id="demo-listen">Listen to the example</button><button class="btn btn-primary" id="demo-close">Back to my task</button></div><p class="small" id="demo-audio-status" role="status"></p>`;
+    exampleDialog.querySelector('#demo-close').onclick = () => exampleDialog.close();
+    exampleDialog.querySelector('#demo-listen').onclick = () => speak([...exampleDialog.querySelectorAll('.demo-step')].map(e=>e.textContent).join(' '), {force:true,onError:()=>{exampleDialog.querySelector('#demo-audio-status').textContent='Voice is unavailable. Follow the pictures and words.';}});
+    exampleDialog.showModal();
+  };
+  exampleDialog.addEventListener('close', () => {stopSpeech();requestAnimationFrame(()=>root.querySelector('#btn-example').focus());});
+  root.querySelector('#btn-mode').onclick = e => {
     const next = document.documentElement.dataset.mode === 'class' ? 'ipad' : 'class';
-    applyMode(next);
+    applyMode(next); params.set('mode',next);
+    history.replaceState(null,'',`${location.pathname}?${params}`);
     e.currentTarget.setAttribute('aria-pressed', String(next === 'class'));
     renderTeacherBar();
     window.dispatchEvent(new Event('resize'));
-  });
-  root.querySelector('#btn-full').addEventListener('click', toggleFullscreen);
-  root.querySelector('#btn-new').addEventListener('click', () => {
-    if (onNewLearner) onNewLearner();
-    announce('Ready for the next learner.');
-  });
-
+  };
+  root.querySelector('#btn-full').onclick = toggleFullscreen;
+  root.querySelector('#btn-new').onclick = () => {
+    stopSpeech(); onNewLearner?.(); announce('Ready for the next learner.');
+    root.querySelector('.title').tabIndex = -1; root.querySelector('.title').focus();
+  };
   const bar = root.querySelector('#teacher-bar');
   function renderTeacherBar() {
-    const isClass = document.documentElement.dataset.mode === 'class';
-    bar.hidden = !isClass || teacherControls.length === 0;
+    bar.hidden = document.documentElement.dataset.mode !== 'class' || teacherControls.length === 0;
+    bar.innerHTML = '';
     if (bar.hidden) return;
-    bar.innerHTML = `<span class="label">Teacher controls</span>` + teacherControls.map((c) =>
-      `<button class="btn" data-key="${c.key}">${c.label}<kbd>${c.key.toUpperCase()}</kbd></button>`).join('');
-    bar.querySelectorAll('button').forEach((b) => {
-      b.addEventListener('click', () => teacherControls.find((c) => c.key === b.dataset.key).onClick());
-    });
+    bar.append(el('span',{class:'label',text:'Teacher controls'}));
+    teacherControls.forEach(c => bar.append(button(c.label,{onClick:c.onClick})));
   }
   renderTeacherBar();
-  document.addEventListener('keydown', (e) => {
-    if (e.target.matches('input, select, textarea')) return;
-    if (document.documentElement.dataset.mode !== 'class') return;
-    const c = teacherControls.find((x) => x.key === e.key.toLowerCase());
-    if (c && !e.metaKey && !e.ctrlKey && !e.altKey) { e.preventDefault(); c.onClick(); }
-  });
-
+  window.addEventListener('sampler-mode-change',e=>{root.querySelector('#btn-mode').setAttribute('aria-pressed',String(e.detail.mode==='class'));renderTeacherBar();});
   const drawer = root.querySelector('#drawer');
-  root.querySelector('#btn-setup').addEventListener('click', () => openDrawer());
-  drawer.addEventListener('click', (e) => { if (e.target === drawer) closeDrawer(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawer.open) closeDrawer(); });
-
-  let drawerContent = null;
-  function openDrawer() {
+  const closeDrawer = () => drawer.close();
+  drawer.addEventListener('close',()=>requestAnimationFrame(()=>root.querySelector('#btn-setup').focus()));
+  root.querySelector('#btn-setup').onclick = () => {
     if (!drawerContent) return;
-    drawer.querySelector('#sheet').innerHTML = '';
-    drawer.querySelector('#sheet').append(drawerContent());
-    drawer.setAttribute('open', '');
-    drawer.open = true;
-    const first = drawer.querySelector('select, input, button');
-    if (first) first.focus();
-  }
-  function closeDrawer() { drawer.removeAttribute('open'); drawer.open = false; }
-
-  return {
-    stage: root.querySelector('#stage'),
-    setDrawer(fn) { drawerContent = fn; },
-    closeDrawer,
-    activity,
+    stopSpeech(); const sheet = drawer.querySelector('#sheet'); sheet.replaceChildren(drawerContent());
+    drawer.showModal();
   };
+  drawer.addEventListener('click',e=>{if(e.target===drawer) {const r=drawer.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeDrawer();}});
+  document.addEventListener('keydown', e => {
+    if(e.target.matches('input,select,textarea') || document.querySelector('dialog[open]') || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+    if(e.key.toLowerCase()==='f'){e.preventDefault();toggleFullscreen();return;}
+    if(document.documentElement.dataset.mode !== 'class') return;
+    const c = teacherControls.find(x=>x.key===e.key.toLowerCase());
+    if(c){e.preventDefault();c.onClick();}
+  });
+  window.addEventListener('pagehide',stopSpeech);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSpeech();});
+  window.advanceTime = ms => new Promise(resolve=>setTimeout(resolve,Math.min(Math.max(ms,0),1000)));
+  window.render_game_to_text = () => JSON.stringify({activity,instruction:readInstruction(),mode:document.documentElement.dataset.mode});
+  return {stage,setDrawer(fn){drawerContent=fn;},setInstruction(fn){instructionReader=fn;},setExample(fn){exampleAction=fn;},closeDrawer,activity};
 }
 
-export function toggleFullscreen() {
+export async function toggleFullscreen() {
   try {
     const el = document.documentElement;
-    if (document.fullscreenElement || document.webkitFullscreenElement) {
-      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-    } else {
-      (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
-    }
-  } catch { /* fullscreen unavailable (iPad Safari page): normal window works */ }
+    if(document.fullscreenElement || document.webkitFullscreenElement) await (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else await (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+  } catch { announce('Full screen is unavailable here. You can keep using this view.'); }
 }
 
 export function feedbackEl(container) {
@@ -227,6 +241,8 @@ export function talkPrompts(items, heading = 'Talk about it') {
   const d = document.createElement('div');
   d.className = 'talk';
   d.innerHTML = `<h3>${heading}</h3><ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+  const listen = button('Listen to the questions', {quiet:true, onClick:()=>speak(items.join(' '), {force:true,onError:()=>announce('Voice is unavailable. The questions are shown on screen.')})});
+  d.append(listen);
   return d;
 }
 

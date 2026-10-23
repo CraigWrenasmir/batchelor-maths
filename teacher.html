@@ -24,11 +24,14 @@
 <div class="wrap">
   <p><a href="index.html">← Home</a></p>
   <h1>Teacher set up</h1>
-  <p class="muted">Choose an activity and its settings. The link you get is bookmarkable and works on iPads, the board and laptops. Year labels and curriculum codes appear here only, never on the student screen.</p>
+  <p class="muted">Choose an activity and its settings. The link you get is bookmarkable and works on iPads, the board and laptops. Choose challenge and support separately. Start with a short demonstration, then try the same round in pairs.</p>
 
+  <p><a href="docs/teacher-guides.html#routines">Start here: a first 15–20 minute session</a></p>
   <div class="panel">
     <label for="activity">Activity</label>
     <select id="activity">
+      <option value="pack-the-gear">Pack the gear (totals and parts)</option>
+      <option value="find-the-way">Find the way (routes and directions)</option>
       <option value="how-many">How many? (estimate and count)</option>
       <option value="where-does-it-go">Where does it go? (number line)</option>
       <option value="grow-the-pattern">Grow the pattern (growing and repeating patterns)</option>
@@ -38,7 +41,7 @@
     <select id="preset"></select>
     <p class="codes" id="preset-note"></p>
 
-    <div id="opt-context"><label for="context">What we are counting</label><select id="context"></select></div>
+    <div id="opt-context"><label for="context">Materials</label><select id="context"></select></div>
     <div id="opt-game"><label for="game">Game</label><select id="game"><option value="place">Place the cards on the line</option><option value="mystery">Mystery number</option></select></div>
     <div id="opt-quick"><label for="quick">Looking time</label><select id="quick"><option value="off">Scene stays visible (no time pressure)</option><option value="on">Quick look: 3 seconds, then hidden</option></select></div>
 
@@ -46,7 +49,7 @@
       <div><label for="mode">Delivery</label><select id="mode"><option value="ipad">iPad: individual or paired</option><option value="class">Big screen: whole class, teacher controls</option></select></div>
       <div><label for="support">Support</label><select id="support"><option value="full">Full (labels, tally words, rule in words)</option><option value="light">Light (fewer labels and prompts)</option></select></div>
       <div><label for="sound">Sound at start</label><select id="sound"><option value="off">Off (user can turn on)</option><option value="on">On (device speech voice)</option></select></div>
-      <div><label for="seed">Round code (optional)</label><input id="seed" type="number" min="1" placeholder="Leave blank for a random set"></div>
+      <div><label for="seed">Round code (optional)</label><input id="seed" type="number" min="1" max="999999" step="1" placeholder="Leave blank for a random set"></div>
     </div>
 
     <div class="actions">
@@ -61,77 +64,6 @@
 
   <p class="small muted" style="margin-top:20px">Guides: <a href="docs/teacher-guides.html">teacher guides for each activity</a>. The curriculum map and setup notes are in the project repository.</p>
 </div>
-<script type="module">
-  import { HOW_MANY_PRESETS } from './content/how-many.js';
-  import { LINE_PRESETS } from './content/number-line.js';
-  import { PATTERN_PRESETS } from './content/patterns.js';
-  import { CONTEXTS } from './content/contexts.js';
-  import { makeRng } from './src/logic/rng.js';
-  import { chooseScene, describeCount } from './src/logic/howmany.js';
-  import { generateCards, formatValue, benchmarkText } from './src/logic/numberline.js';
-  import { GROWING, countAt } from './src/logic/patterns.js';
-
-  const $ = (id) => document.getElementById(id);
-  const initial = new URLSearchParams(location.search);
-  const sets = { 'how-many': HOW_MANY_PRESETS, 'where-does-it-go': LINE_PRESETS, 'grow-the-pattern': PATTERN_PRESETS };
-  CONTEXTS.forEach((c) => $('context').append(new Option(c.name + (c.regional ? '' : ' (neutral)'), c.id)));
-  if (initial.get('activity')) $('activity').value = initial.get('activity');
-  ['context', 'game', 'quick', 'mode', 'support', 'sound', 'seed'].forEach((k) => { if (initial.get(k)) $(k).value = initial.get(k); });
-
-  function fillPresets() {
-    const act = $('activity').value;
-    $('preset').innerHTML = '';
-    sets[act].forEach((p) => $('preset').append(new Option(p.label, p.id)));
-    if (initial.get('preset') && sets[act].some((p) => p.id === initial.get('preset'))) $('preset').value = initial.get('preset');
-    $('opt-context').hidden = act !== 'how-many';
-    $('opt-quick').hidden = act !== 'how-many';
-    $('opt-game').hidden = act !== 'where-does-it-go';
-    update();
-  }
-  function update() {
-    const act = $('activity').value;
-    const preset = sets[act].find((p) => p.id === $('preset').value);
-    $('preset-note').textContent = `${preset.note ? preset.note + ' ' : ''}Australian Curriculum v9: ${preset.codes.join(', ')}.`;
-    const p = new URLSearchParams();
-    p.set('preset', preset.id);
-    if (act === 'how-many') { p.set('context', $('context').value); p.set('quick', $('quick').value); }
-    if (act === 'where-does-it-go') p.set('game', $('game').value);
-    p.set('mode', $('mode').value); p.set('support', $('support').value); p.set('sound', $('sound').value);
-    if ($('seed').value) p.set('seed', $('seed').value);
-    const rel = `activities/${act}.html?${p.toString()}`;
-    const abs = new URL(rel, location.href).href;
-    $('open').href = rel;
-    $('link').textContent = abs;
-    renderExample(act, preset);
-  }
-  function renderExample(act, preset) {
-    const rng = makeRng(parseInt($('seed').value, 10) || 12345);
-    let html = '<h3>What a round looks like</h3>';
-    if (act === 'how-many') {
-      const s = chooseScene(preset, rng);
-      html += `<p>The screen shows ${s.n} ${CONTEXTS.find((c) => c.id === $('context').value).noun[1]}${s.arrangement === 'rows' ? ` in ${s.rows} rows of ${s.cols}` : s.arrangement === 'groups' ? ` in groups of ${s.groupSize}` : ', scattered'}. The student estimates with the keypad, then taps each one to count. Feedback: <em>${describeCount(s)}</em></p>`;
-    } else if (act === 'where-does-it-go') {
-      if ($('game').value === 'mystery') html += `<p>A number between ${formatValue(preset.min, preset)} and ${formatValue(preset.max, preset)} is hidden. Each guess says bigger or smaller and greys out the part of the line that is ruled out.</p>`;
-      else {
-        const cards = generateCards(preset, preset.cards, rng);
-        html += `<p>Cards: ${cards.map((c) => c.kind === 'dots' ? `${c.display} (as dots)` : c.display).join(', ')}. The student places each one on a line from ${formatValue(preset.min, preset)} to ${formatValue(preset.max, preset)}. Example feedback: <em>${benchmarkText(cards[0].value, preset)}</em></p>`;
-      }
-    } else {
-      if (preset.mode === 'repeat') html += `<p>A repeating pattern of shapes (for example ${preset.units[0].split('').join(', ')}) is shown; the student chooses the next three shapes.</p>`;
-      else {
-        const pat = GROWING.find((g) => g.id === preset.patterns[0]);
-        html += `<p>Steps 1 to 3 of the "${pat.label}" pattern are shown (${[1, 2, 3].map((n) => countAt(pat, n)).join(', ')} tiles). The student builds step 4 by tapping squares, then predicts step ${preset.predict.join(' and step ')}. Rule: <em>${pat.ruleWords}</em></p>`;
-      }
-    }
-    $('example').innerHTML = html;
-  }
-  $('activity').addEventListener('change', fillPresets);
-  ['preset', 'context', 'game', 'quick', 'mode', 'support', 'sound', 'seed'].forEach((k) => $(k).addEventListener('input', update));
-  $('copy').addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText($('link').textContent); $('copied').textContent = 'Copied.'; }
-    catch { $('copied').textContent = 'Select the link below and copy it.'; }
-  });
-  fillPresets();
-</script>
+<script type="module" src="src/teacher.js"></script>
 </body>
 </html>

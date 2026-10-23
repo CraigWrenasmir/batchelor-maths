@@ -1,0 +1,7 @@
+Original prompt: Fix the reviewed issues and combine How many?, Where does it go?, and Grow the pattern with Pack the gear and Find the way into one sampler for Kristen.
+
+Implemented a shared five-activity home, teacher setup and guides. All activities share navigation, Listen, Show me, feedback speech, display mode and new learner controls. Added whole-group counting/direct total entry, editable near number-line placements and touch adjustment, preserved pattern comparisons, corrected changing-increment feedback and larger touch targets. Imported Pack/Find with their existing content and tests, scoped styles and shared round codes.
+
+Validation complete:39 pure logic tests pass. Chromium core, pattern and fieldwork flows passed; WebKit core and full fieldwork flows passed. Responsive screenshots inspected, missing storage/audio and enlarged text checked. Dialog focus restoration and example speech were checked. Source files supplied by the school remain unreadable and no school-specific curriculum alignment is claimed. No physical iPad/Smartboard or classroom impact testing has taken place. No student records or external runtime services.
+
+Canonical source: this repository. GitHub Pages is the shareable version; the existing private preview will mirror these same static assets. Preserve relative paths for static hosting. See docs/testing-log.md for the completed validation record.
