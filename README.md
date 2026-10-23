@@ -94,3 +94,7 @@ The site is static HTML, CSS and JavaScript with no backend, no accounts, no ana
 ## Known limitations
 
 See the end of `docs/curriculum-map.md` and `docs/testing-log.md`.
+
+## Browser walkthrough (optional)
+
+`tools/walkthrough.mjs` drives every page in headless Chrome with Playwright, exercises the main interactions, saves screenshots and reports console errors. It needs Playwright available to Node (for a global install: `NODE_PATH=$(npm root -g) node tools/walkthrough.mjs ./shots`) and the local preview server running on port 8077.
