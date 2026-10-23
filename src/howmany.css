@@ -1,0 +1,12 @@
+/* Keep the collection and answer controls together on a portrait iPad. */
+.howmany-activity .tally:empty,
+.howmany-activity .tally-text:empty { display: none; }
+@media (min-width: 700px) and (max-width: 1000px) and (orientation: portrait) {
+  html:not([data-mode="class"]) .howmany-activity .two-col {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+  .howmany-activity #panel { padding: 14px; }
+  .howmany-activity #panel .prompt { font-size: 1.35em; }
+  .howmany-activity .keypad { gap: 8px; }
+  .howmany-activity .keypad .btn { min-height: 52px; }
+}

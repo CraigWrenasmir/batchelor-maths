@@ -53,3 +53,16 @@ html[data-mode="class"] .pattern-activity { --pattern-cell-size: 56px; }
   .pattern-main-building .grid-scroll-hint { display: none; }
   .pattern-main-building .pattern-build-controls { grid-column: 1; grid-row: 4; }
 }
+/* On a landscape iPad, keep the three examples together so the Check button
+   stays beside the board. Only the examples shrink; touch cells remain 48px. */
+@media (min-width: 1000px) and (max-width: 1199px) {
+  .pattern-main-building .steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    align-items: end;
+    --preview-tile-size: 14px;
+  }
+  .pattern-main-building .steps .step { width: 100%; padding: 8px 6px; }
+  .pattern-main-building .steps svg { max-width: 100%; height: auto; margin-inline: auto; }
+}

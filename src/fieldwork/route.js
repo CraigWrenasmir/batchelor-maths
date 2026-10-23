@@ -1,11 +1,11 @@
 import { DIRECTIONS, sameCell, shortestPath, simulateRoute, stepFrom, makeRouteSession } from './route-content.js';
 
 const ICONS = {
-  start: '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 33V8h23v25M8 20h23M16 8v25M24 8v25" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M8 8h8v12H8zm16 0h7v12h-7zm-8 12h8v13h-8z" fill="currentColor" opacity=".2"/></svg>',
+  start: '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="4 3"/></svg>',
   goal: '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M12 34V7m1 1h19l-5 7 5 7H13" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M14 9h15l-4 6 4 5H14z" fill="currentColor" opacity=".22"/></svg>',
   block: '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="m7 15 12-7 14 7v15l-13 5L7 28z" fill="currentColor" opacity=".2"/><path d="m7 15 12-7 14 7v15l-13 5L7 28zm0 0 13 6 13-6M20 21v14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/></svg>',
   stop: '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" stroke-width="2.7"/><circle cx="20" cy="20" r="5" fill="currentColor"/></svg>',
-  mover: '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="10" y="12" width="20" height="22" rx="6" fill="currentColor"/><path d="M15 12V9a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" stroke-width="3"/><path d="M15 23h10m-10 4h10" stroke="white" stroke-width="2" opacity=".85"/></svg>',
+  mover: '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="8" r="5" fill="currentColor"/><path d="M20 17v9m-9-7 9-3 9 3m-9 7-7 9m7-9 7 9" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   dot: '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="12" fill="currentColor"/><circle cx="17" cy="16" r="3" fill="white" opacity=".6"/></svg>'
 };
 
@@ -34,7 +34,7 @@ export function mountRoute(container, config = {}, api = {}) {
   let generation = 0;
   let destroyed = false;
   const maxCommands = options.routeLevel === 'short' ? 18 : 28;
-  const moverName = options.context === 'shapes' ? 'marker' : 'bag';
+  const moverName = options.context === 'shapes' ? 'counter' : 'person';
   const moverIcon = options.context === 'shapes' ? ICONS.dot : ICONS.mover;
   const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -47,7 +47,7 @@ export function mountRoute(container, config = {}, api = {}) {
         <section class="route-map-panel" aria-label="Route map">
           <div class="route-map-header"><span>THE MAP</span><span data-route="map-caption"></span></div>
           <div class="route-board" data-route="board" role="group" aria-label="Map. Rows go down; columns go right."></div>
-          <div class="route-legend"><span><i class="route-legend-start"></i>Start</span><span><i class="route-legend-goal"></i>Flag</span><span><i class="route-legend-block"></i>Block</span><span data-route="stop-legend" hidden><i class="route-legend-stop"></i>Visit stop</span></div>
+          <div class="route-legend"><span class="route-legend-mover">${moverIcon}Move me</span><span class="route-legend-goal">${ICONS.goal}Finish</span><span class="route-legend-block">${ICONS.block}Block</span><span class="route-legend-stop" data-route="stop-legend" hidden>${ICONS.stop}Visit stop</span></div>
           <button class="route-secondary route-pick" data-action="pick" hidden>Choose flag position</button>
           <p class="route-map-note" data-route="map-note"></p>
         </section>
@@ -98,13 +98,13 @@ export function mountRoute(container, config = {}, api = {}) {
 
   function instruction() {
     const stop = map.waypoint ? ' Visit the round stop before finishing at the flag.' : '';
-    return `${map.prompt}${stop}`;
+    return `${map.kind === 'plan' ? `Move the ${moverName} from Start to the flag.` : map.prompt}${stop}`;
   }
 
   function initialMessage() {
     if (map.kind === 'repair') return 'Look at the arrows already here. What needs to change?';
     if (map.kind === 'partner') return 'Choose a new flag position, or use this one. Then pass the challenge to a partner.';
-    if (options.support === 'guided') return 'Point to the start and flag. Choose your arrows, then test the route.';
+    if (options.support === 'guided') return `Find the ${moverName} on Start. Choose arrows, then tap Test route.`;
     return 'Plan your route, then test your arrows.';
   }
 
@@ -155,11 +155,11 @@ export function mountRoute(container, config = {}, api = {}) {
       tile.setAttribute('role', canPick ? 'button' : 'img');
       if (canPick) tile.tabIndex = 0;
       else tile.removeAttribute('tabindex');
-      const items = [start && 'start', goal && 'flag', stop && `stop${visitedStop ? ', visited' : ''}`, blocked && 'block', current && moverName].filter(Boolean);
+      const items = [start && 'Start square', goal && 'Finish flag', stop && `stop${visitedStop ? ', visited' : ''}`, blocked && 'block', current && moverName].filter(Boolean);
       tile.setAttribute('aria-label', `${canPick ? 'Put the flag at ' : ''}${positionText(p)}: ${items.length ? items.join(', ') : 'open'}`);
       let icon = blocked ? ICONS.block : goal ? ICONS.goal : stop ? ICONS.stop : start ? ICONS.start : '';
-      if (current) icon = `<span class="route-cell-mover">${moverIcon}</span>${(goal || stop || start) ? `<span class="route-cell-corner">${goal ? ICONS.goal : stop ? ICONS.stop : ICONS.start}</span>` : ''}`;
-      tile.innerHTML = `<span class="route-cell-coordinate" aria-hidden="true">${p.row + 1}·${p.col + 1}</span>${icon}${travelled && !current && !blocked ? '<span class="route-trace-dot" aria-hidden="true"></span>' : ''}`;
+      if (current) icon = `<span class="route-cell-mover">${moverIcon}</span>${(goal || stop) ? `<span class="route-cell-corner">${goal ? ICONS.goal : ICONS.stop}</span>` : ''}`;
+      tile.innerHTML = `${!start && !goal ? `<span class="route-cell-coordinate" aria-hidden="true">${p.row + 1}·${p.col + 1}</span>` : ''}${icon}${start || goal ? `<span class="route-cell-label" aria-hidden="true">${start ? 'Start' : 'Finish'}</span>` : ''}${travelled && !current && !blocked && !start && !goal ? '<span class="route-trace-dot" aria-hidden="true"></span>' : ''}`;
     }
     el('board').classList.toggle('is-choosing', pickingGoal);
   }
@@ -197,7 +197,7 @@ export function mountRoute(container, config = {}, api = {}) {
     el('map-caption').textContent = `${map.size} × ${map.size}`;
     el('support').hidden = !supported;
     el('stop-legend').hidden = !map.waypoint;
-    el('map-note').textContent = pickingGoal ? 'Choose an open square for the flag.' : options.support === 'guided' ? `Every test starts the ${moverName} at the start. One arrow moves one square.` : `Every test starts at the start.`;
+    el('map-note').textContent = pickingGoal ? 'Choose an open square for the flag.' : options.support === 'guided' ? `One arrow moves the ${moverName} one square. Each test begins on Start.` : `Each test begins on Start.`;
     el('message').textContent = message;
     el('message').className = `route-message is-${messageTone}`;
     el('reflection').hidden = status !== 'success';

@@ -16,6 +16,13 @@ The tested version combines Pack the gear, Find the way, How many?, Where does i
 
 Browser evidence and screenshots were retained in the development workspace. `npm test` runs the repeatable pure logic tests. `tools/walkthrough.mjs` provides the core browser regression checks when Playwright and its browsers are installed; it defaults to a local server at port 8077. Set `BASE_URL`, `QA_OUTPUT` or `PLAYWRIGHT_EXECUTABLE_PATH` when needed. Run with `node tools/walkthrough.mjs` for Chromium or `node tools/walkthrough.mjs webkit` for WebKit.
 
+## Tablet usability follow-up
+
+- Rechecked all five initial activity views in WebKit at 768 × 1024 and 1024 × 768. No horizontal overflow or application errors were observed.
+- Find the way now uses a person (or plain counter), persistent Start/Finish labels and matching map/legend icons. Touch-based completion and reset passed in six layouts/context combinations, including 1024 × 680 and 1024 × 600 usable viewports. Direction controls and map squares stayed at least 48 px in the tested views. All eight route logic tests passed.
+- How many keeps its picture and answer keypad alongside one another on portrait tablets. Grow the pattern uses a compact row of examples in landscape tablet widths, keeping Check beside the build grid. Large pattern grids retain 48 px cells and can still need vertical scrolling.
+- This is browser and touch-event emulation, not testing on a physical iPad.
+
 ## Classroom checks still needed
 
 - A physical school iPad and Smartboard: touch accuracy, orientation, display size, volume, voice availability and fullscreen behaviour.
