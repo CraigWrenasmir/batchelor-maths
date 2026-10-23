@@ -6,11 +6,12 @@
 <meta name="theme-color" content="#1f3f2c">
 <title>Batchelor Maths Sampler</title>
 <link rel="stylesheet" href="src/shared.css">
-<link rel="icon" href="assets/logo-placeholder.svg" type="image/svg+xml">
+<link rel="icon" href="assets/batchelor-area-school-logo.jpg" type="image/jpeg">
 <style>
   .home { max-width: 1200px; margin: 0 auto; padding: 24px 16px 0; }
   .masthead { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-  .masthead img { width: 72px; height: 72px; border-radius: 16px; }
+  .masthead img { width: 144px; height: auto; flex: 0 0 auto; object-fit: contain; border-radius: 12px; }
+  .masthead > div { flex: 1; min-width: 0; }
   .masthead .school { margin: 0; font-size: 1.05em; color: var(--ink-soft); font-weight: 600; }
   .masthead h1 { margin: 2px 0 0; font-size: 2.2em; line-height: 1.1; color: var(--green-deep); }
   .tagline { color: var(--ink-soft); margin: 10px 0 26px; font-size: 1.1em; }
@@ -25,14 +26,14 @@
   footer.horizon { margin-top: 24px; }
   .tile:nth-child(-n+2) { grid-column:span 3; }
   @media(max-width:900px) { .tiles { grid-template-columns:repeat(2,minmax(0,1fr)); } .tile,.tile:nth-child(-n+2) { grid-column:auto; } }
-  @media(max-width:560px) { .tiles { grid-template-columns:minmax(0,1fr); } .masthead h1 { font-size:1.8em; } }
+  @media(max-width:560px) { .tiles { grid-template-columns:minmax(0,1fr); } .masthead img { width:112px; } .masthead h1 { font-size:1.8em; } }
   .draft { display: inline-block; background: var(--clay-light); color: var(--clay); font-weight: 700; font-size: 0.75em; padding: 2px 10px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
 </style>
 </head>
 <body>
 <div class="home">
   <header class="masthead">
-    <img id="logo" alt="" src="assets/logo-placeholder.svg">
+    <img id="logo" alt="Batchelor Area School logo" src="assets/batchelor-area-school-logo.jpg" width="2048" height="2048">
     <div>
       <p class="school" id="school-name"></p>
       <h1 id="collection-title"></h1>

@@ -93,7 +93,7 @@ For another HTTPS static host, copy `index.html`, `teacher.html`, `activities/`,
 
 ## Identity, context and provenance
 
-School name, logo and acknowledgement wording are configured in `src/config.js`. The logo asset is a placeholder, not an approved school logo. Local names, distances, artwork and acknowledgement wording should be checked with the school and relevant community contributors. The sampler does not imply cultural endorsement. No student details or school-supplied curriculum documents are included.
+School name, logo and acknowledgement wording are configured in `src/config.js`. The school logo was supplied by Craig for this sampler and is displayed without altering the artwork. Local names, distances, artwork and acknowledgement wording should be checked with the school and relevant community contributors. The sampler does not imply cultural endorsement. No student details or school-supplied curriculum documents are included.
 
 The combined collection builds on the original three-activity Claude sampler in this repository at commit [`ae5a818ac5db7a74ed8884d636d0ce44c142a310`](https://github.com/CraigWrenasmir/batchelor-maths/tree/ae5a818ac5db7a74ed8884d636d0ce44c142a310), and the separate Pack the gear / Find the way prototype developed for this project. Their content and logic have been integrated into one static site. SVG scenes, icons and activity artwork are original project assets; they are not documentary images of the school or community.
 
