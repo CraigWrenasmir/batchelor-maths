@@ -69,7 +69,7 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     head.append(step, title, instruction);
 
     const targetPanel = node('div', 'pack-request');
-    const targetLabel = node('div', 'pack-request-label', 'REQUEST');
+    const targetLabel = node('div', 'pack-request-label', 'We need');
     const targetValue = node('div', 'pack-request-number');
     const targetWord = node('span', 'pack-request-word', noun);
     const targetDots = node('div', 'pack-target-dots');
@@ -77,10 +77,10 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     targetPanel.append(targetLabel, targetValue, targetWord, targetDots);
 
     const creator = node('div', 'pack-creator');
-    const creatorLabel = node('span', '', 'Choose the request');
-    const targetMinus = button('−', 'pack-step-button', () => changeTarget(-1), 'Make the request one smaller');
+    const creatorLabel = node('span', '', 'Choose a number');
+    const targetMinus = button('−', 'pack-step-button', () => changeTarget(-1), 'Choose one less');
     const targetDisplay = node('output', 'pack-create-value');
-    const targetPlus = button('+', 'pack-step-button', () => changeTarget(1), 'Make the request one larger');
+    const targetPlus = button('+', 'pack-step-button', () => changeTarget(1), 'Choose one more');
     creator.append(creatorLabel, targetMinus, targetDisplay, targetPlus);
 
     const previous = node('p', 'pack-previous');
@@ -92,7 +92,7 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     taskLayout.append(targetPanel, trays);
 
     const transfers = node('div', 'pack-transfers');
-    const transferLabel = node('span', 'pack-transfer-label', 'Keep the same total');
+    const transferLabel = node('span', 'pack-transfer-label', 'Move 1');
     const moveAB = button('A → B', 'pack-move-button', () => move('a'), 'Move one object from Tray A to Tray B');
     const moveBA = button('B → A', 'pack-move-button', () => move('b'), 'Move one object from Tray B to Tray A');
     transfers.append(transferLabel, moveAB, moveBA);
@@ -105,9 +105,9 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     response.setAttribute('aria-atomic', 'true');
 
     const actions = node('div', 'pack-actions');
-    const checkButton = button('Check my pack', 'pack-primary', check);
-    const nextButton = button('Continue →', 'pack-next', next);
-    const moreButton = button('Another session', 'pack-next', newSession);
+    const checkButton = button('Check', 'pack-primary', check);
+    const nextButton = button('Next →', 'pack-next', next);
+    const moreButton = button('New pack', 'pack-next', newSession);
     actions.append(checkButton, nextButton, moreButton);
 
     const helpPanel = node('aside', 'pack-help-panel');
@@ -140,10 +140,10 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     const objects = node('div', 'pack-objects');
     objects.setAttribute('role', 'group');
     objects.setAttribute('aria-labelledby', heading.id);
-    const empty = node('span', 'pack-empty', 'Ready to pack');
+    const empty = node('span', 'pack-empty', 'Empty');
     const controls = node('div', 'pack-tray-controls');
     const minus = button('−', 'pack-step-button', () => changeCount(lower, -1), `Remove one ${config.context === 'shapes' ? 'tile' : 'marker'} from Tray ${label}`);
-    const labelText = node('span', '', 'one at a time');
+    const labelText = node('span', '', '');
     const plus = button('+', 'pack-step-button', () => changeCount(lower, 1), `Add one ${config.context === 'shapes' ? 'tile' : 'marker'} to Tray ${label}`);
     controls.append(minus, labelText, plus);
     root.append(header, objects, controls);
@@ -162,7 +162,7 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
       if (config.support === 'guided') token.textContent = String(i + 1);
       fragment.append(token);
     }
-    if (value === 0) fragment.append(node('span', 'pack-empty', 'Empty tray'));
+    if (value === 0) fragment.append(node('span', 'pack-empty', 'Empty'));
     tray.objects.replaceChildren(fragment);
     tray.objects.setAttribute('aria-label', `${value} ${noun} in Tray ${name}`);
   }
@@ -171,11 +171,11 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     if (destroyed) return;
     const current = stage();
     const success = status === 'correct' || status === 'revealed';
-    elements.step.textContent = `PART ${stageIndex + 1} OF ${plan.stages.length}`;
+    elements.step.textContent = `Part ${stageIndex + 1} of ${plan.stages.length}`;
     elements.title.textContent = current.title;
     elements.instruction.textContent = packInstruction(current, config);
     elements.targetValue.textContent = String(stageTarget);
-    elements.targetPanel.setAttribute('aria-label', `Request: ${stageTarget} ${noun}`);
+    elements.targetPanel.setAttribute('aria-label', `We need ${stageTarget} ${noun}`);
     elements.targetDots.hidden = config.support !== 'guided';
     if (config.support === 'guided') {
       elements.targetDots.replaceChildren(...Array.from({ length: stageTarget }, () => node('span', 'pack-target-dot')));
@@ -185,21 +185,22 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     elements.targetMinus.disabled = stageTarget <= 1;
     elements.targetPlus.disabled = stageTarget >= config.packRange;
     elements.previous.hidden = current.kind !== 'different';
-    elements.previous.textContent = prior ? `Your first pack: ${prior[0]} in A + ${prior[1]} in B = ${prior[0] + prior[1]}. Find another split.` : '';
+    elements.previous.textContent = prior ? `Before: A had ${prior[0]}. B had ${prior[1]}.` : '';
     updateTray(elements.trayA, a, 'A');
     updateTray(elements.trayB, b, 'B');
     elements.moveAB.disabled = a === 0;
     elements.moveBA.disabled = b === 0;
     elements.equation.hidden = config.support === 'independent' && !checked;
-    elements.equation.textContent = `${a} + ${b} = ${a + b} altogether`;
+    elements.equation.textContent = `${a} + ${b} = ${a + b}`;
     elements.note.textContent = a + b >= config.packRange
-      ? `All ${config.packRange} available ${noun} are out. Move one between trays, or take one away.`
-      : `Tap + to add, − to take away, or an arrow to move one between trays.`;
+      ? `All ${config.packRange} are in the trays.`
+      : '';
+    elements.note.hidden = !elements.note.textContent;
     elements.response.textContent = feedback;
     elements.response.hidden = !feedback;
     elements.response.classList.toggle('is-success', success);
     elements.response.classList.toggle('is-revealed', status === 'revealed');
-    elements.checkButton.textContent = success ? 'Check again' : 'Check my pack';
+    elements.checkButton.textContent = success ? 'Check' : 'Check';
     elements.nextButton.hidden = stageIndex === plan.stages.length - 1;
     elements.nextButton.disabled = !success;
     elements.moreButton.hidden = !(stageIndex === plan.stages.length - 1 && success);
@@ -226,7 +227,7 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     stageTarget = Math.min(config.packRange, Math.max(1, stageTarget + delta));
     clearCheck();
     update();
-    speak(`New request: ${stageTarget} ${noun}.`);
+    speak(`We need ${stageTarget} ${noun}.`);
   }
   function check() {
     const result = validatePack(stage(), a, b, prior);
@@ -234,6 +235,7 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     status = result.correct ? 'correct' : 'working';
     feedback = packFeedback(stage(), result, a, b, config);
     update();
+    speak(feedback);
   }
   function next() {
     if (!['correct', 'revealed'].includes(status) || stageIndex >= plan.stages.length - 1) return false;
@@ -256,7 +258,7 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     clearCheck();
     elements.helpPanel.hidden = true;
     update();
-    speak('This part has been reset.');
+    speak('Try this part again.');
   }
   function newSession() {
     variant++;
@@ -272,7 +274,7 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     elements.helpPanel.hidden = true;
     update();
     elements.title.focus({ preventScroll: true });
-    speak('A new packing session is ready.');
+    speak('Your new pack is ready.');
   }
   function showHelp(title, text, exampleValues = null) {
     helpReturnFocus = document.activeElement;
@@ -298,12 +300,12 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
   }
   function hint() {
     helpUsed = true;
-    showHelp('A way to think about it', packHint(stage(), a, b, config, prior));
+    showHelp('Try this', packHint(stage(), a, b, config, prior));
     notify();
   }
   function example() {
     // A separate worked example; the learner's target, trays and progress are untouched.
-    showHelp('Worked example · a separate pack', `Here is a request for 3 ${noun}. Put 1 in Tray A and 2 in Tray B. 1 + 2 = 3. Move one from B to A: now 2 + 1 = 3. The split changed; the total stayed the same. Your pack is still above.`, [1, 2]);
+    showHelp('Watch this example', `We need 3 ${noun}. Put 1 in A. Put 2 in B. 1 + 2 = 3. Move one from B to A. Now 2 + 1 = 3. The total stays the same.`, [1, 2]);
   }
   function reveal() {
     [a, b] = packSolution(stage(), prior);
@@ -311,7 +313,7 @@ export function mountPack(container, incomingConfig = {}, incomingApi = {}) {
     status = 'revealed';
     helpUsed = true;
     revealUsed = true;
-    feedback = `Solution shown together: ${a} + ${b} = ${stageTarget}. This is one possible pack. Talk about how it works, or change the trays and try your own way.`;
+    feedback = `${a} + ${b} = ${stageTarget}. Here is one way. Can you find another?`;
     update();
     speak(feedback);
   }

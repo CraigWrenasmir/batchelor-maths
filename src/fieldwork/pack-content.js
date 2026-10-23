@@ -24,11 +24,11 @@ export function createPackPlan(range = 10, variant = 0) {
     limit,
     variant: index,
     stages: [
-      { kind: 'make', title: 'Fill the request', target: first, initial: [0, 0] },
-      { kind: 'different', title: 'Another way to pack', target: first, initial: null },
-      { kind: 'change', title: 'The request has changed', target: changed, initial: null },
-      { kind: 'repair', title: 'Check someone else’s pack', target: repair, initial: [Math.floor(wrongTotal / 2), Math.ceil(wrongTotal / 2)] },
-      { kind: 'create', title: 'Make your own challenge', target: first, initial: [0, 0] },
+      { kind: 'make', title: 'Pack the trays', target: first, initial: [0, 0] },
+      { kind: 'different', title: 'Try another way', target: first, initial: null },
+      { kind: 'change', title: 'Pack a new number', target: changed, initial: null },
+      { kind: 'repair', title: 'Fix the pack', target: repair, initial: [Math.floor(wrongTotal / 2), Math.ceil(wrongTotal / 2)] },
+      { kind: 'create', title: 'Choose your number', target: first, initial: [0, 0] },
     ],
   };
 }
@@ -65,11 +65,11 @@ export function packSolution(stage, prior = null) {
 export function packInstruction(stage, config) {
   const noun = config.context === 'shapes' ? 'tiles' : 'markers';
   switch (stage.kind) {
-    case 'different': return `Keep ${stage.target} ${noun}. Put a different number in each tray than before.`;
-    case 'change': return `The new request is ${stage.target} ${noun}. Change the pack you already have.`;
-    case 'repair': return `This pack needs ${stage.target} ${noun}. Check it and make any changes it needs.`;
-    case 'create': return `Choose a request. Pack it in the two trays, then invite someone to find another way.`;
-    default: return `Pack ${stage.target} ${noun} across the two trays. You choose how many go in each.`;
+    case 'different': return `Keep ${stage.target} ${noun} altogether. Move some to the other tray.`;
+    case 'change': return `Make ${stage.target} ${noun} altogether. Add or take some away.`;
+    case 'repair': return `We need ${stage.target} ${noun}. Count the pack. Fix it.`;
+    case 'create': return `Choose a number. Pack that many ${noun}.`;
+    default: return `Put ${stage.target} ${noun} in the trays altogether.`;
   }
 }
 
@@ -77,29 +77,29 @@ export function packFeedback(stage, result, a, b, config) {
   const noun = config.context === 'shapes' ? 'tiles' : 'markers';
   if (result.correct) {
     const equation = `${a} + ${b} = ${stage.target}.`;
-    if (result.swapped) return `${equation} The trays have switched amounts. The total is still ${stage.target}. Can you describe another change?`;
-    if (stage.kind === 'different') return `${equation} A different split, with the same total. What stayed the same?`;
-    if (stage.kind === 'change') return `${equation} Your pack matches the new request. How did you change it?`;
-    if (stage.kind === 'repair') return `${equation} The pack now matches. How could you explain your repair?`;
-    if (stage.kind === 'create') return `${equation} Your challenge is ready. Invite someone to pack ${stage.target} a different way, or change your request.`;
-    return `${equation} Your pack matches. Tell or show someone how you know.`;
+    if (result.swapped) return `${equation} You swapped the amounts. The total stayed the same.`;
+    if (stage.kind === 'different') return `${equation} A new way. The same total. What changed?`;
+    if (stage.kind === 'change') return `${equation} You made the new total. What did you change?`;
+    if (stage.kind === 'repair') return `${equation} You fixed the pack. Show what you changed.`;
+    if (stage.kind === 'create') return `${equation} Ask someone to pack ${stage.target} another way.`;
+    return `${equation} You packed ${stage.target}. Show how you know.`;
   }
-  if (result.reason === 'same-split') return `The total is ${stage.target}, and the trays match your first pack. Move some ${noun} between trays to find a different split.`;
-  if (result.reason === 'invalid') return 'Use the tray buttons to build a pack, then check it again.';
+  if (result.reason === 'same-split') return `You have ${stage.target}. Try a new way. Move some ${noun} to the other tray.`;
+  if (result.reason === 'invalid') return 'Use + to add. Tap Check when you are ready.';
   const direction = result.reason === 'too-few' ? 'more' : 'fewer';
   const compare = config.support === 'guided'
-    ? `The pack needs ${result.difference} ${direction}.`
-    : `Compare your total with the request. Does the pack need more or fewer?`;
-  return `There are ${result.total} ${noun}; the request is ${stage.target}. ${compare} You can change either tray and check again.`;
+    ? `We need ${result.difference} ${direction}.`
+    : `Do you need more or fewer?`;
+  return `You have ${result.total}. We need ${stage.target}. ${compare}`;
 }
 
 export function packHint(stage, a, b, config, prior = null) {
   if (stage.kind === 'different') {
     return a + b === stage.target
-      ? 'Move one object from a tray into the other tray. What happens to the total?'
-      : 'First make the requested total. Then move an object between trays without adding or taking any away.';
+      ? 'Move one to the other tray. Does the total change?'
+      : `First make ${stage.target}. Then move one to the other tray.`;
   }
-  if (a + b === stage.target) return 'Count each tray, then count the two trays together. You can use Check when you are ready.';
-  if (stage.kind === 'create') return 'Pick a number for someone else to pack. There can be many ways to split the same total.';
-  return `Count what is already in the trays. Compare that with ${stage.target}. Will you add objects or take some away?`;
+  if (a + b === stage.target) return 'Count both trays together. Then tap Check.';
+  if (stage.kind === 'create') return 'Choose a number. Ask someone to pack it another way.';
+  return `Count both trays. We need ${stage.target}. Use + to add. Use − to take away.`;
 }

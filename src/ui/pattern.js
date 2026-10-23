@@ -2,15 +2,15 @@
 // predict a far step and explain the rule. Also continues repeating patterns.
 import { mountShell, setting, feedbackEl, button, keypad, talkPrompts, el, params } from '../shared.js';
 import { makeRng, randomSeed } from '../logic/rng.js';
-import { GROWING, countAt, judgeArrangement, buildMessage, predictMessage, bounds, repeatingSequence, nextInRepeating } from '../logic/patterns.js';
+import { GROWING, countAt, judgeArrangement, predictMessage, bounds, repeatingSequence, nextInRepeating } from '../logic/patterns.js';
 import { PATTERN_PRESETS, patternPreset } from '../../content/patterns.js';
 import { svgEl } from './scenes.js';
 
 const SHAPES = {
   A: { name: 'green circle', svg: '<circle cx="50" cy="50" r="40" fill="#2f5f3f"/>' },
-  B: { name: 'clay triangle', svg: '<path d="M50 10 L92 88 L8 88 Z" fill="#b65a2e"/>' },
+  B: { name: 'orange triangle', svg: '<path d="M50 10 L92 88 L8 88 Z" fill="#b65a2e"/>' },
   C: { name: 'blue square', svg: '<rect x="12" y="12" width="76" height="76" rx="8" fill="#2f6f8a"/>' },
-  D: { name: 'sand diamond', svg: '<path d="M50 6 L94 50 L50 94 L6 50 Z" fill="#b8956a"/>' },
+  D: { name: 'brown diamond', svg: '<path d="M50 6 L94 50 L50 94 L6 50 Z" fill="#b8956a"/>' },
 };
 
 const state = {
@@ -37,6 +37,7 @@ const shell = mountShell({
 shell.setDrawer(drawerContent);
 const stageEl = shell.stage;
 stageEl.classList.add('pattern-activity');
+stageEl.classList.toggle('growing-pattern', state.preset.mode !== 'repeat');
 stageEl.innerHTML = `
   <div class="two-col">
     <div class="panel"><p class="prompt" id="prompt"></p><p class="hint-text" id="sub"></p><div id="board"></div></div>
@@ -64,7 +65,7 @@ function newRound(sameSeed = false) {
     state.currentSlot = 0;
     state.stage = 'repeat';
     promptEl.textContent = 'What comes next?';
-    subEl.textContent = 'Choose a shape for each empty box.';
+    subEl.textContent = 'Tap a shape for the empty box.';
     renderRepeat();
     return;
   }
@@ -79,7 +80,7 @@ function newRound(sameSeed = false) {
   state.alternateKept = false;
   state.revealed = false;
   promptEl.textContent = `Build step ${state.buildStep}.`;
-  subEl.textContent = 'Look at how the pattern grows. Tap squares to add tiles.';
+  subEl.textContent = 'Tap squares to make the next shape.';
   renderGrow();
 }
 
@@ -88,7 +89,7 @@ function tileSvg(cells, { showParts = false, interactive = false, gridBounds = n
   const b = gridBounds || bounds(cells);
   const size = interactive ? 48 : 24, pad = 4;
   const w = b.w * size + pad * 2, h = b.h * size + pad * 2;
-  const svg = svgEl('svg', { viewBox: `0 0 ${w} ${h}`, width: w, height: h, style: interactive ? `--grid-cols:${b.w};--grid-rows:${b.h}` : `width:calc(${b.w} * var(--preview-tile-size, 1.4em));height:auto` });
+  const svg = svgEl('svg', { viewBox: `0 0 ${w} ${h}`, width: w, height: h, style: interactive ? `--grid-cols:${b.w};--grid-rows:${b.h}` : `width:calc(${b.w + pad * 2 / size} * var(--preview-tile-size, 1.4em));height:auto` });
   if (interactive) {
     for (let x = b.minX; x <= b.maxX; x++) for (let y = b.minY; y <= b.maxY; y++) {
       const k = `${x},${y}`;
@@ -129,6 +130,8 @@ function renderGrow() {
   stageEl.querySelector('.two-col').classList.toggle('building-layout', state.stage === 'build');
   const steps = el('div', { class: 'steps' });
   const p = state.pattern;
+  // A shared scale keeps the growth visible across all three examples.
+  steps.style.setProperty('--max-preview-cols', Math.max(...Array.from({ length: state.buildStep - 1 }, (_, i) => bounds(p.cells(i + 1)).w)));
   for (let n = 1; n < state.buildStep; n++) {
     const s = el('div', { class: 'step' });
     s.append(el('div', { class: 'step-label', text: `Step ${n}` }));
@@ -149,7 +152,7 @@ function renderGrow() {
   if (state.stage === 'build') {
     const s = el('div', { class: 'step build' });
     s.append(el('div', { class: 'step-label', text: `Your step ${state.buildStep}` }));
-    s.append(el('p', { class: 'small muted grid-scroll-hint', text: 'Tap to add or remove a tile. If needed, swipe sideways to see the whole grid.' }));
+    s.append(el('p', { class: 'small muted grid-scroll-hint', text: 'Tap again to remove a tile.' }));
     const scroll = el('div', { class: 'pattern-grid', role: 'region', 'aria-label': 'Tile building grid. Scroll sideways if needed.', tabindex: '0' });
     scroll.append(tileSvg(buildCells, { interactive: true, gridBounds }));
     s.append(scroll);
@@ -157,11 +160,11 @@ function renderGrow() {
     board.append(s);
   } else {
     const comparison = el('div', { class: 'pattern-comparison' });
-    comparison.append(comparisonShape('Your arrangement', learnerCells()));
-    comparison.append(comparisonShape(`The shown pattern: step ${state.buildStep}`, buildCells, state.partsShown));
+    comparison.append(comparisonShape('Your shape', learnerCells()));
+    comparison.append(comparisonShape(`Step ${state.buildStep}`, buildCells, state.partsShown));
     board.append(comparison);
-    if (state.alternateKept) board.append(el('p', { class: 'small', text: 'Your arrangement has the same total. For the next questions, use the growth rule in the shown pattern.' }));
-    if (state.revealed) board.append(el('p', { class: 'small', text: 'Teacher reveal: the shown pattern is displayed beside your work.' }));
+    if (state.alternateKept) board.append(el('p', { class: 'small', text: 'Keep your shape. Use the other pattern for the next question.' }));
+    if (state.revealed) board.append(el('p', { class: 'small', text: 'The teacher has shown step 4.' }));
   }
   renderGrowSide();
 }
@@ -192,21 +195,20 @@ function renderGrowSide() {
   side.hidden = state.stage === 'build';
   const p = state.pattern;
   if (state.stage === 'compare') {
-    promptEl.textContent = 'Same total. Same pattern?';
-    subEl.textContent = 'Look at your arrangement beside the shown pattern.';
-    side.append(el('p', { class: 'prompt', text: 'Compare the shapes' }));
-    side.append(el('p', { text: 'You have the right number of tiles. The arrangement is different. Explain what you changed.' }));
+    promptEl.textContent = 'Compare the shapes.';
+    subEl.textContent = 'Same number of tiles. Different shape.';
+    side.append(el('p', { class: 'prompt', text: 'Change your shape?' }));
     const actions = el('div', { class: 'actions' });
-    actions.append(button('Revise my build', { primary: true, onClick: () => {
+    actions.append(button('Change it', { primary: true, onClick: () => {
       state.stage = 'build';
       promptEl.textContent = `Build step ${state.buildStep}.`;
-      subEl.textContent = 'Your tiles are still here. Change their arrangement and check again.';
+      subEl.textContent = 'Tap squares to change your shape.';
       renderGrow();
     } }));
-    actions.append(button('Keep my arrangement', { onClick: () => {
+    actions.append(button('Keep it', { onClick: () => {
       state.alternateKept = true;
       startPredictions();
-      feedback.set('info', 'Your arrangement is kept. Now predict the totals in the shown pattern.');
+      feedback.set('info', 'Your shape is saved. Look at the other pattern.');
     } }));
     side.append(actions);
     feedback = feedbackEl(side);
@@ -214,7 +216,6 @@ function renderGrowSide() {
   }
   if (state.stage === 'build') {
     const controls = el('div', { class: 'pattern-build-controls' });
-    controls.append(el('p', { class: 'hint-text', text: 'Check your shape and total.' }));
     const actions = el('div', { class: 'actions' });
     actions.append(button('Check', { primary: true, onClick: checkBuild }));
     actions.append(button('Clear', { quiet: true, onClick: () => { state.built.clear(); renderGrow(); } }));
@@ -225,23 +226,23 @@ function renderGrowSide() {
   }
   const askStep = state.preset.predict[state.predictIdx];
   if (state.stage === 'predict' && askStep !== undefined) {
-    promptEl.textContent = 'Predict the next totals.';
-    subEl.textContent = 'Use the shown pattern. Your arrangement stays on the board.';
-    side.append(el('p', { class: 'prompt', text: `How many tiles at step ${askStep}?` }));
+    promptEl.textContent = 'How does the pattern grow?';
+    subEl.textContent = 'Use step 4 to help.';
+    side.append(el('p', { class: 'prompt', text: `How many at step ${askStep}?` }));
     side.append(valuesTable(askStep));
-    const pad = keypad({ onDone: (v) => checkPredict(v), maxDigits: 4 });
+    const pad = keypad({ onDone: (v) => checkPredict(v), maxDigits: 4, doneLabel: 'Check' });
     side.append(pad.el);
     feedback = feedbackEl(side);
     setTimeout(() => pad.el.focus(), 50);
     return;
   }
   side.append(el('p', { class: 'prompt', text: 'The rule' }));
-  promptEl.textContent = 'Explain the rule.';
-  subEl.textContent = 'Show how the pattern grows. Compare it with your arrangement.';
+  promptEl.textContent = 'How does it grow?';
+  subEl.textContent = 'Tell someone what changes.';
   side.append(valuesTable());
   if (state.preset.showRule || state.support === 'full') side.append(el('p', { text: p.ruleWords }));
   const actions = el('div', { class: 'actions' });
-  actions.append(button('Next pattern', { primary: true, onClick: () => newRound() }));
+  actions.append(button('Next', { primary: true, onClick: () => newRound() }));
   side.append(actions);
   feedback = feedbackEl(side);
 }
@@ -252,15 +253,15 @@ function checkBuild() {
   if (j.correct) {
     state.alternateKept = false;
     startPredictions();
-    feedback.set('ok', `Your shape and total match the shown pattern: ${j.expected} tiles.`, p.nonlinear ? 'The orange column is new at this step. The next column will be one taller.' : `Each step adds ${p.a} tiles.`);
+    feedback.set('ok', `Your shape matches. ${j.expected} tiles.`, p.nonlinear ? 'Each new column is one taller.' : `Each step adds ${p.a} tiles.`);
   } else if (j.countCorrect) {
     state.stage = 'compare';
     state.compared = true;
     state.partsShown = true;
     renderGrow();
-    feedback.set('info', 'The total matches. Compare the arrangements before you continue.');
+    feedback.set('info', 'The number is right. Look at the shapes.');
   } else {
-    feedback.set('try', buildMessage(p, state.buildStep, state.built.size) + ' Adjust your build and check again.');
+    feedback.set('try', state.built.size < j.expected ? 'Add more tiles.' : 'Remove some tiles.', `Look at step ${state.buildStep - 1}. How does it grow?`);
   }
 }
 
@@ -280,17 +281,16 @@ function checkPredict(v) {
     renderGrowSide();
     feedback.set('ok', predictMessage(p, askStep, v));
   } else {
-    const prev = askStep - 1;
-    feedback.set('try', `Not ${v}. Think about step ${prev} and what each step adds. ${p.nonlinear ? 'This pattern does not add the same amount each time.' : `Each step adds ${p.a}.`}`);
+    feedback.set('try', `Try again. ${p.nonlinear ? 'Each new column is one taller.' : `Each step adds ${p.a} tiles.`}`);
   }
 }
 
 function addTalk() {
   talkBox.innerHTML = '';
   talkBox.append(talkPrompts([
-    state.pattern.nonlinear ? 'How many tiles does the next column add? What changes each time?' : 'Which tiles stay? Which tiles get added?',
-    `How would you work out step 100 without drawing it?`,
-    'Can you arrange the same totals in a different way? Explain your rule.',
+    state.pattern.nonlinear ? 'How tall is the next column?' : 'Which tiles stay? Which are new?',
+    'How many tiles at step 100?',
+    'Can you make a different pattern with these totals?',
   ]));
 }
 
@@ -313,7 +313,7 @@ function renderRepeat() {
   });
   board.append(row);
   side.innerHTML = '';
-  side.append(el('p', { class: 'prompt', text: 'Choose a shape' }));
+  side.append(el('p', { class: 'prompt', text: 'Tap a shape' }));
   const pal = el('div', { class: 'shape-row palette' });
   const letters = [...new Set(state.unit.split(''))].concat(state.unit.length < 3 ? ['C'] : []);
   letters.forEach((l) => {
@@ -332,7 +332,7 @@ function renderRepeat() {
   const check = button('Check', { primary: true, onClick: checkRepeat });
   check.disabled = state.slots.some((x) => x === null);
   actions.append(check);
-  actions.append(button('Next pattern', { quiet: true, onClick: () => newRound() }));
+  actions.append(button('Next', { quiet: true, onClick: () => newRound() }));
   side.append(actions);
   feedback = feedbackEl(side);
 }
@@ -345,11 +345,11 @@ function checkRepeat() {
   const start = state.shown.length;
   const wrong = state.slots.map((l, i) => l === nextInRepeating(state.unit, start + i) ? null : i).filter((x) => x !== null);
   if (wrong.length === 0) {
-    feedback.set('ok', `Yes. The part that repeats is: ${unitWords()}.`);
+    feedback.set('ok', `The pattern matches. ${unitWords()} repeats.`);
     talkBox.innerHTML = '';
-    talkBox.append(talkPrompts(['Clap the pattern. Where does it start again?', 'What would the 20th shape be? How do you know?', 'Make the same pattern with sounds or actions.']));
+    talkBox.append(talkPrompts(['Clap the pattern.', 'What is the 20th shape?', 'Show the pattern with actions.']));
   } else {
-    feedback.set('try', `${wrong.length === 1 ? 'One box is' : `${wrong.length} boxes are`} not right yet. Say the pattern out loud and listen for where it starts again.`);
+    feedback.set('try', `${wrong.length === 1 ? 'One box needs' : `${wrong.length} boxes need`} a change. Say the pattern out loud.`);
   }
 }
 
@@ -361,7 +361,7 @@ function hint() {
   state.partsShown = true;
   renderGrow();
   const p = state.pattern;
-  feedback.set('info', p.nonlinear ? 'Orange shows the column added at this step. Each new column is one taller.' : `${p.b > 0 ? 'Blue marks the fixed part. ' : ''}Orange marks the part that grows. Each step adds ${p.a} tiles.`);
+  feedback.set('info', p.nonlinear ? 'Look at the new orange column. Each new column is one taller.' : `${p.b > 0 ? 'Blue stays the same. ' : ''}Orange grows. Each step adds ${p.a} tiles.`);
 }
 
 function reveal() {

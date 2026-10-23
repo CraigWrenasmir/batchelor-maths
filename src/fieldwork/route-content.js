@@ -93,10 +93,10 @@ export function makeRouteSession(config = {}, variant = 0) {
   const source = LEVELS[level];
   const base = { size: source.size, start: source.start, goal: source.goal, waypoint: source.waypoint || null, obstacles: source.obstacles, commands: [] };
   const definitions = [
-    { ...base, kind: 'plan', title: 'Plan a route', prompt: 'Make a route from the start to the flag.', reflection: 'Show someone how your arrows match the route. Could another route work?' },
-    { ...base, ...source.change, kind: 'change', title: 'A path is blocked', prompt: 'A new block is in the way. Make a route around it.', reflection: 'Which part of your route changed? Which part could stay the same?' },
-    { ...base, ...source.repair, kind: 'repair', title: 'Repair a route', prompt: 'These arrows need a change. Predict what will happen, then test them.', reflection: 'Point to the change you made. Why does the route work now?' },
-    { ...base, ...source.partner, kind: 'partner', title: 'Make a challenge', prompt: 'Choose a flag position, then let a partner make the route.', reflection: 'Can your partner find another route to the same flag?' }
+    { ...base, kind: 'plan', title: 'Find the flag', prompt: 'Move from Start to Finish.', reflection: 'Show your way. Can you find another?' },
+    { ...base, ...source.change, kind: 'change', title: 'Go around the block', prompt: 'A new block is in the way. Change your arrows.', reflection: 'Which arrows did you change?' },
+    { ...base, ...source.repair, kind: 'repair', title: 'Fix the arrows', prompt: 'Look at these arrows. Try them. Fix the way.', reflection: 'Show the arrow you changed. Why?' },
+    { ...base, ...source.partner, kind: 'partner', title: 'Choose the finish', prompt: 'Move the flag. Ask someone to find a way.', reflection: 'Can you find another way to the flag?' }
   ];
   const reflectX = Math.abs(variant) % 2 === 1;
   const reflectY = Math.floor(Math.abs(variant) / 2) % 2 === 1;

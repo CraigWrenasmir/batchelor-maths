@@ -23,6 +23,15 @@ Browser evidence and screenshots were retained in the development workspace. `np
 - How many keeps its picture and answer keypad alongside one another on portrait tablets. Grow the pattern uses a compact row of examples in landscape tablet widths, keeping Check beside the build grid. Large pattern grids retain 48 px cells and can still need vertical scrolling.
 - This is browser and touch-event emulation, not testing on a physical iPad.
 
+## Readability follow-up
+
+- Student screens use larger system text, short action labels and a consistent Listen / Show me / Hint row. Teacher controls are grouped in the Teacher dialog; discussion questions expand on request.
+- All 39 logic tests pass. The maintained WebKit walkthrough passes counting/retry/grouping, exact number placement, mystery clues, shared-device reset, current instruction speech and settings focus restoration.
+- Fifteen WebKit activity/layout combinations (five activities at 768 × 1024, 1024 × 680 and 390 × 844) passed checks for help access, hidden adult controls, mode changes, feedback speech preference, new-learner reset and no horizontal overflow.
+- Twenty core-activity touch states passed in WebKit at both iPad orientations. Pack/Route touch flows passed in Chromium and WebKit, including checked answers, changed routes and examples. Pack check results now reach the optional feedback voice. Standard game-client screenshots for all five activities were inspected.
+- Unavailable speech/storage, enlarged text, help controls and dialog keyboard focus were checked.
+- Repeating-pattern and mystery-number examples now match their selected task modes. Darker pattern-grid outlines help distinguish adjacent squares.
+
 ## Classroom checks still needed
 
 - A physical school iPad and Smartboard: touch accuracy, orientation, display size, volume, voice availability and fullscreen behaviour.

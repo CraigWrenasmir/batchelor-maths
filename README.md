@@ -23,7 +23,7 @@ The activities are designed for iPad browsers, interactive boards and laptops. B
 - **Counting:** direct total entry with retry feedback; whole-group and row counting; an option to arrange scattered collections into groups. One-by-one counting remains available.
 - **Number line:** close placements remain editable and are distinguished from exact placements. Touch and keyboard adjustment controls support precise placement.
 - **Patterns:** a correct total in a different arrangement leads to comparison. The learner's construction is kept; continuing uses the shown pattern's growth rule. Stairs feedback describes its changing increments.
-- **Access:** a shared **Listen** control reads the current instruction; **Show me** gives a separate visual example; optional **Read feedback** uses the device voice. These support teacher demonstration rather than replacing it.
+- **Access:** a shared **Listen** control reads the current instruction; **Show me** gives a separate visual example; **Hint** provides extra help; optional **Read feedback** in **Teacher** uses the device voice. These support teacher demonstration rather than replacing it.
 - **One collection:** all five activities share a home page, teacher setup, guide links and delivery controls.
 
 ## Run it locally
@@ -87,7 +87,7 @@ Pack cycles through three number sequences per range; Find cycles through four r
 
 The canonical public site is [GitHub Pages](https://craigwrenasmir.github.io/batchelor-maths/index.html), served from this repository. The application is static HTML, CSS and JavaScript. It has no application backend, student accounts, analytics, saved results or live AI calls. It makes no application requests to an AI service. The hosting provider may still maintain its normal server logs.
 
-Only delivery and feedback-reading preferences are kept in browser storage where available. **New learner** clears the activity work. No performance history is recorded. Speech uses the browser/device voice; availability and voice quality vary, and the activity works with speech off.
+Only delivery and feedback-reading preferences are kept in browser storage where available. **Teacher → New learner** clears the activity work. No performance history is recorded. Speech uses the browser/device voice; availability and voice quality vary, and the activity works with speech off.
 
 For another HTTPS static host, copy `index.html`, `teacher.html`, `activities/`, `src/`, `content/`, `assets/` and `docs/`, preserving their relative paths and file types. A school-approved web server is appropriate; a document preview service may not execute the JavaScript. Offline caching is not implemented or guaranteed. Adding a shortcut to an iPad Home Screen does not make the site available offline.
 

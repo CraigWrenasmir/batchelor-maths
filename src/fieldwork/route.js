@@ -45,26 +45,26 @@ export function mountRoute(container, config = {}, api = {}) {
       <p class="route-instruction" data-route="instruction"></p>
       <div class="route-layout">
         <section class="route-map-panel" aria-label="Route map">
-          <div class="route-map-header"><span>THE MAP</span><span data-route="map-caption"></span></div>
+
           <div class="route-board" data-route="board" role="group" aria-label="Map. Rows go down; columns go right."></div>
-          <div class="route-legend"><span class="route-legend-mover">${moverIcon}Move me</span><span class="route-legend-goal">${ICONS.goal}Finish</span><span class="route-legend-block">${ICONS.block}Block</span><span class="route-legend-stop" data-route="stop-legend" hidden>${ICONS.stop}Visit stop</span></div>
-          <button class="route-secondary route-pick" data-action="pick" hidden>Choose flag position</button>
+          <div class="route-legend"><span class="route-legend-mover">${moverIcon}Move me</span><span class="route-legend-goal">${ICONS.goal}Finish</span><span class="route-legend-block">${ICONS.block}Block</span><span class="route-legend-stop" data-route="stop-legend" hidden>${ICONS.stop}Visit here</span></div>
+          <button class="route-secondary route-pick" data-action="pick" hidden>Move flag</button>
           <p class="route-map-note" data-route="map-note"></p>
         </section>
         <section class="route-plan-panel" aria-label="Route controls">
           <div class="route-plan-header"><h3>Your arrows</h3><span data-route="queue-count"></span></div>
-          <p class="route-small">Arrows always mean up, right, down or left on this screen.</p>
+
           <div class="route-command-pad" aria-label="Add a direction">
             ${Object.entries(DIRECTIONS).map(([key, d]) => `<button class="route-direction" data-direction="${key}" aria-label="Add ${d.label.toLowerCase()} arrow"><span aria-hidden="true">${d.glyph}</span><small>${d.label}</small></button>`).join('')}
           </div>
-          <div class="route-queue-wrap"><ol class="route-queue" data-route="queue" aria-label="Planned directions"></ol><p class="route-queue-empty" data-route="queue-empty">Choose arrows to make your route.</p></div>
-          <p class="route-queue-help">Tap an arrow in your route to remove it.</p>
-          <div class="route-edit-controls"><button class="route-secondary" data-action="undo">Undo last</button><button class="route-secondary" data-action="clear">Clear arrows</button></div>
-          <button class="route-test" data-action="test"><span aria-hidden="true">▶</span> Test route</button>
-          <button class="route-secondary route-stop" data-action="stop" hidden>Stop test</button>
+          <div class="route-queue-wrap"><ol class="route-queue" data-route="queue" aria-label="Planned directions"></ol><p class="route-queue-empty" data-route="queue-empty">Tap arrows. Then tap Go.</p></div>
+          <p class="route-queue-help" data-route="queue-help" hidden>Tap an arrow here to remove it.</p>
+          <div class="route-edit-controls"><button class="route-secondary" data-action="undo">Undo</button><button class="route-secondary" data-action="clear">Clear</button></div>
+          <button class="route-test" data-action="test"><span aria-hidden="true">▶</span> Go</button>
+          <button class="route-secondary route-stop" data-action="stop" hidden>Stop</button>
           <div class="route-message" data-route="message" tabindex="-1"></div>
           <p class="route-reflection" data-route="reflection" hidden></p>
-          <button class="route-next" data-action="next" hidden>Next challenge <span aria-hidden="true">→</span></button>
+          <button class="route-next" data-action="next" hidden>Next <span aria-hidden="true">→</span></button>
         </section>
       </div>
       <div class="route-example" data-route="example" hidden></div>
@@ -97,15 +97,15 @@ export function mountRoute(container, config = {}, api = {}) {
   }
 
   function instruction() {
-    const stop = map.waypoint ? ' Visit the round stop before finishing at the flag.' : '';
-    return `${map.kind === 'plan' ? `Move the ${moverName} from Start to the flag.` : map.prompt}${stop}`;
+    const stop = map.waypoint ? ' Visit the round stop on your way.' : '';
+    return `${map.kind === 'plan' ? `Move the ${moverName} from Start to Finish.` : map.prompt}${stop}`;
   }
 
   function initialMessage() {
-    if (map.kind === 'repair') return 'Look at the arrows already here. What needs to change?';
-    if (map.kind === 'partner') return 'Choose a new flag position, or use this one. Then pass the challenge to a partner.';
-    if (options.support === 'guided') return `Find the ${moverName} on Start. Choose arrows, then tap Test route.`;
-    return 'Plan your route, then test your arrows.';
+    if (map.kind === 'repair') return '';
+    if (map.kind === 'partner') return '';
+    if (options.support === 'guided') return '';
+    return '';
   }
 
   function loadStage(index, focus = false) {
@@ -186,6 +186,7 @@ export function mountRoute(container, config = {}, api = {}) {
       (target || root.querySelector('[data-direction="up"]')).focus({ preventScroll: true });
     }
     el('queue-empty').hidden = commands.length > 0;
+    el('queue-help').hidden = commands.length === 0;
     el('queue-count').textContent = `${commands.length} ${commands.length === 1 ? 'step' : 'steps'}`;
   }
 
@@ -194,24 +195,24 @@ export function mountRoute(container, config = {}, api = {}) {
     el('stage-label').textContent = `Challenge ${stageIndex + 1} of ${stages.length}`;
     el('title').textContent = map.title;
     el('instruction').textContent = instruction();
-    el('map-caption').textContent = `${map.size} × ${map.size}`;
     el('support').hidden = !supported;
     el('stop-legend').hidden = !map.waypoint;
-    el('map-note').textContent = pickingGoal ? 'Choose an open square for the flag.' : options.support === 'guided' ? `One arrow moves the ${moverName} one square. Each test begins on Start.` : `Each test begins on Start.`;
+    el('map-note').textContent = pickingGoal ? 'Tap an empty square.' : '1 arrow = 1 square.';
     el('message').textContent = message;
+    el('message').hidden = !message;
     el('message').className = `route-message is-${messageTone}`;
     el('reflection').hidden = status !== 'success';
     el('reflection').textContent = map.reflection;
     button('pick').hidden = map.kind !== 'partner';
     button('pick').disabled = running;
-    button('pick').textContent = pickingGoal ? 'Keep this flag position' : 'Choose flag position';
+    button('pick').textContent = pickingGoal ? 'Keep flag here' : 'Move flag';
     button('test').hidden = running;
     button('test').disabled = !commands.length || pickingGoal;
     button('stop').hidden = !running;
     button('undo').disabled = running || !commands.length;
     button('clear').disabled = running || !commands.length;
     button('next').hidden = status !== 'success';
-    button('next').innerHTML = stageIndex === stages.length - 1 ? 'Try a fresh map <span aria-hidden="true">↗</span>' : 'Next challenge <span aria-hidden="true">→</span>';
+    button('next').innerHTML = stageIndex === stages.length - 1 ? 'New map <span aria-hidden="true">↗</span>' : 'Next <span aria-hidden="true">→</span>';
     root.querySelectorAll('[data-direction]').forEach(b => { b.disabled = running || commands.length >= maxCommands || pickingGoal; });
     renderGrid();
     renderQueue();
@@ -231,7 +232,7 @@ export function mountRoute(container, config = {}, api = {}) {
     if (running || pickingGoal || commands.length >= maxCommands) return;
     commands.push(direction);
     const count = commands.length;
-    changedPlan(count === maxCommands ? `You have ${count} arrows. Test this route or remove an arrow to make a change.` : `${DIRECTIONS[direction].label} added. ${count} ${count === 1 ? 'arrow' : 'arrows'} in your route.`);
+    changedPlan(count === maxCommands ? `You have ${count} arrows. Tap Go. Or remove an arrow.` : `${DIRECTIONS[direction].label} added.`);
   }
 
   function finishRun(result) {
@@ -239,13 +240,13 @@ export function mountRoute(container, config = {}, api = {}) {
     status = result.status;
     const step = activeCommand + 1;
     if (result.status === 'blocked') {
-      say(result.blocked === 'edge' ? `Step ${step} would leave the map. The ${moverName} stopped. Change that arrow and test again.` : `Step ${step} meets a block. The ${moverName} stopped before it. Change your route and test again.`, 'notice');
+      say(result.blocked === 'edge' ? `Arrow ${step} goes off the map. Change that arrow. Try again.` : `Arrow ${step} hits a block. Go around it. Try again.`, 'notice');
     } else if (result.status === 'success') {
-      say(`You reached the flag${map.waypoint ? ' and visited the stop' : ''}. Your route works!`, 'success');
+      say(`You reached Finish${map.waypoint ? ' and visited the stop' : ''}.`, 'success');
     } else if (result.status === 'missing-stop') {
-      say('You reached the flag. The round stop still needs a visit. Change your route to include it.', 'notice');
+      say('You reached Finish. Visit the round stop too. Change your arrows.', 'notice');
     } else {
-      say(`Your arrows finished at ${positionText(player)}. The flag is at ${positionText(map.goal)}. Add or change arrows, then test from the start.`, 'notice');
+      say(`You have not reached Finish yet. Add or change arrows. Try again from Start.`, 'notice');
     }
     render();
     if (document.activeElement === document.body || document.activeElement === button('stop')) button('test').focus({ preventScroll: true });
@@ -258,7 +259,7 @@ export function mountRoute(container, config = {}, api = {}) {
     resetPosition();
     running = true;
     status = 'running';
-    say('Watch the arrows: one arrow moves one square.', 'neutral', false);
+    say('Watch. One arrow moves one square.', 'neutral', false);
     const currentGeneration = generation;
     let index = 0;
     const delay = reducedMotion() ? 0 : (config.mode || options.mode) === 'classroom' ? 800 : 550;
@@ -291,7 +292,7 @@ export function mountRoute(container, config = {}, api = {}) {
     if (!running) return;
     cancelRun();
     status = 'paused';
-    say('Test stopped. Your arrows are still here. Test again to start from the start.');
+    say('Stopped. Tap Go to try again from Start.');
     render();
     button('test').focus({ preventScroll: true });
     notify();
@@ -301,11 +302,11 @@ export function mountRoute(container, config = {}, api = {}) {
     if (!pickingGoal || running || tile.getAttribute('role') !== 'button') return;
     const goal = { row: Number(tile.dataset.row), col: Number(tile.dataset.col) };
     const path = shortestPath({ ...map, goal });
-    if (!path) { say('That square cannot be reached. Choose another open square.', 'notice'); render(); return; }
+    if (!path) { say('You cannot get there. Choose another square.', 'notice'); render(); return; }
     map.goal = goal;
     commands = [];
     supported = false;
-    changedPlan(`The flag is now at ${positionText(goal)}. Give your partner a turn to plan the route.`);
+    changedPlan('The flag has moved. Ask someone to find a way.');
     root.querySelector('[data-direction="up"]').focus({ preventScroll: true });
   }
 
@@ -314,16 +315,16 @@ export function mountRoute(container, config = {}, api = {}) {
     const result = simulateRoute(map, commands);
     supported = true;
     if (result.status === 'success' && commands.length) {
-      say('Your arrows already reach the flag. Test the route and explain why it works.', 'help');
+      say('Your arrows reach Finish. Tap Go. Show how it works.', 'help');
     } else if (result.status === 'blocked') {
       const bad = result.blockedAt;
       const remaining = shortestPath({ ...map, start: result.position, waypoint: result.visitedStop ? null : map.waypoint });
-      const suggestion = remaining?.length ? ` From that square, try ${DIRECTIONS[remaining[0]].label.toLowerCase()}.` : '';
-      say(`Look at step ${bad + 1}: it meets ${result.blocked === 'edge' ? 'the edge' : 'a block'}.${suggestion} You can tap an arrow in your route to remove it.`, 'help');
+      const suggestion = remaining?.length ? ` Try ${DIRECTIONS[remaining[0]].label.toLowerCase()} from there.` : '';
+      say(`Arrow ${bad + 1} hits ${result.blocked === 'edge' ? 'the edge' : 'a block'}.${suggestion} Tap that arrow to remove it.`, 'help');
     } else {
       const remaining = shortestPath({ ...map, start: result.position, waypoint: result.visitedStop ? null : map.waypoint });
       const first = remaining?.[0];
-      say(first ? `${commands.length ? 'After your current arrows, try' : 'Start by going'} ${DIRECTIONS[first].label.toLowerCase()} ${DIRECTIONS[first].glyph}. ${map.waypoint && !result.visitedStop ? 'Make a route to the round stop, then to the flag.' : 'Trace the next part with your finger before adding more arrows.'}` : 'Check where the arrows finish. The route needs to end on the flag.', 'help');
+      say(first ? `${commands.length ? 'Next, try' : 'Start with'} ${DIRECTIONS[first].label.toLowerCase()} ${DIRECTIONS[first].glyph}. ${map.waypoint && !result.visitedStop ? 'Visit the round stop. Then go to Finish.' : 'Trace the way with your finger.'}` : 'Look where the arrows stop. You need to reach Finish.', 'help');
     }
     render();
     notify();
@@ -336,7 +337,7 @@ export function mountRoute(container, config = {}, api = {}) {
     commands = shortestPath(map) || [];
     resetPosition();
     status = 'planning';
-    say('Here is one route. Follow the arrows with your finger, then test it. You can change it to try another way.', 'help');
+    say('Here is one way. Follow it with your finger. Then tap Go.', 'help');
     render();
     notify();
   }
@@ -347,21 +348,21 @@ export function mountRoute(container, config = {}, api = {}) {
     const panel = el('example');
     panel.hidden = !exampleOpen;
     if (!exampleOpen) { if (exampleReturnFocus?.isConnected) exampleReturnFocus.focus({ preventScroll: true }); notify(); return; }
-    panel.innerHTML = `<div class="route-example-heading"><h3 tabindex="-1">A different map: worked example</h3><button class="route-secondary" data-action="close-example">Close example</button></div><p>Start at the left. The flag is two squares to the right.</p><div class="route-example-board" role="img" aria-label="Three open squares in a row. Start at square one. Flag at square three."><span>${moverIcon}</span><span>·</span><span>${ICONS.goal}</span></div><p class="route-example-arrows"><strong>→ &nbsp; →</strong><span>Right, then right. Each arrow moves one square.</span></p><p>With just one right arrow, the ${moverName} stops in the middle. Add a second right arrow to reach the flag.</p><p class="route-small">Your own map and arrows stay as they are.</p>`;
+    panel.innerHTML = `<div class="route-example-heading"><h3 tabindex="-1">Watch this example</h3><button class="route-secondary" data-action="close-example">Close</button></div><p>Start on the left. Go right twice.</p><div class="route-example-board" role="img" aria-label="Three open squares in a row. Start at square one. Flag at square three."><span>${moverIcon}</span><span>·</span><span>${ICONS.goal}</span></div><p class="route-example-arrows"><strong>→ &nbsp; →</strong><span>Right. Then right. You reached Finish.</span></p><p>One arrow stops in the middle. Two arrows reach the flag.</p>`;
     panel.querySelector('h3').focus({ preventScroll: true });
     panel.scrollIntoView({ behavior: reducedMotion() ? 'instant' : 'smooth', block: 'nearest' });
-    announce('Worked example. Two right arrows move two squares to the flag. Your map has not changed.');
+    announce('Watch this example. Go right twice to reach the flag. Your map has not changed.');
     notify();
   }
 
-  function reset() { loadStage(stageIndex); announce('This challenge has been reset.'); }
+  function reset() { loadStage(stageIndex); announce('Try this map again.'); }
   function newSession() { variant += 1; stages = makeRouteSession(options, variant); exampleOpen = false; el('example').hidden = true; loadStage(0, true); announce('A fresh map is ready.'); }
   function next() {
     if (running) return;
     if (stageIndex < stages.length - 1) {
       if (stageIndex === 0) stages[1].commands = [...commands];
       loadStage(stageIndex + 1, true);
-      if (map.kind === 'change' && commands.length) { say('Your earlier arrows are still here. Predict what happens with the new block, then test and change your route.', 'neutral', false); render(); }
+      if (map.kind === 'change' && commands.length) { say('Your arrows are still here. Will they work? Tap Go.', 'neutral', false); render(); }
       announce(instruction());
     }
     else newSession();
@@ -374,7 +375,7 @@ export function mountRoute(container, config = {}, api = {}) {
     if (remove && !running) {
       const index = Number(remove.dataset.removeIndex);
       commands.splice(index, 1);
-      changedPlan(`Step ${index + 1} removed. ${commands.length} ${commands.length === 1 ? 'arrow remains' : 'arrows remain'}.`);
+      changedPlan(`Arrow ${index + 1} removed.`);
       return;
     }
     const tile = event.target.closest('[data-cell]');
@@ -383,11 +384,11 @@ export function mountRoute(container, config = {}, api = {}) {
     if (action === 'test') testRoute();
     if (action === 'stop') stopTest();
     if (action === 'undo' && !running && commands.length) { commands.pop(); changedPlan('Last arrow removed.'); }
-    if (action === 'clear' && !running) { commands = []; changedPlan('Arrows cleared. Make a new route.'); }
+    if (action === 'clear' && !running) { commands = []; changedPlan('Arrows cleared. Try a new way.'); }
     if (action === 'next') next();
     if (action === 'pick' && !running) {
       pickingGoal = !pickingGoal;
-      say(pickingGoal ? 'Choose an open square for your flag.' : 'Flag position kept. Plan your arrows.');
+      say(pickingGoal ? 'Tap an empty square for the flag.' : 'The flag stays here. Choose your arrows.');
       render();
       if (pickingGoal) el('board').querySelector('[role="button"]')?.focus({ preventScroll: true });
       notify();

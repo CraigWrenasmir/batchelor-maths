@@ -12,7 +12,7 @@ const choices = {
   packRange: [['5', 'Amounts up to 5'], ['10', 'Amounts up to 10'], ['20', 'Amounts up to 20']],
   routeLevel: [['short', 'Short routes'], ['turns', 'More steps'], ['detour', 'Changing routes']],
   support: [['guided', 'Visible prompts'], ['some', 'Hints on request'], ['independent', 'Try independently']],
-  context: [['equipment', 'Equipment'], ['shapes', 'Plain counters']],
+  context: [['equipment', isPack ? 'Equipment' : 'Person'], ['shapes', 'Plain counters']],
   mode: [['ipad', 'Individual / pairs'], ['class', 'Big screen']],
 };
 
@@ -41,22 +41,10 @@ const shell = mountShell({
     { key: 'r', label: 'Show one solution', onClick: () => controller?.reveal() },
   ],
 });
-const tools = el('div', { class: 'fieldwork-tools', 'aria-label': 'Activity support' });
-tools.append(
-  button('Hint', { onClick: () => showHint() }),
-  button('Start again', { onClick: () => { stopSpeech(); controller?.reset(); } }),
-);
-const codeLabel = el('span', { class: 'fieldwork-round' });
-tools.append(codeLabel);
 const container = el('div', { class: 'fieldwork-root' });
 const footer = el('div', { class: 'fieldwork-footer' }, [
-  el('a', { href: `../docs/teacher-guides.html#${activity}`, text: 'Teacher guide' }),
-  el('span', { text: 'No results are saved.' }),
+  button('Start again', { quiet: true, onClick: () => { stopSpeech(); controller?.reset(); } }),
 ]);
-// Keep all repeatable support controls together, saving a row on the board.
-const helpBar = document.querySelector('.help-bar');
-if (helpBar) helpBar.append(tools);
-else shell.stage.append(tools);
 shell.stage.append(container, footer);
 
 function stopSpeech() { try { window.speechSynthesis?.cancel(); } catch { /* optional speech */ } }
@@ -66,11 +54,10 @@ function reflectMode() {
   controller?.setMode(config.mode);
 }
 function showRoundCode() {
-  codeLabel.textContent = `Round code ${roundCode}`;
   params.set('seed', String(roundCode));
   const url = new URL(location.href);
   url.search = params.toString();
-  try { history.replaceState(null, '', url); } catch { /* visible round code still works */ }
+  try { history.replaceState(null, '', url); } catch { /* round selection still works */ }
 }
 function mount() {
   controller?.destroy();
@@ -107,13 +94,13 @@ function showExample() {
   const panel = container.querySelector(isPack ? '.pack-help-panel' : '.route-example');
   if (!panel || panel.hidden) return;
   const status = el('p', { 'data-example-audio': '', role: 'status', class: 'fieldwork-example-status' });
-  const listen = button('Listen to the example', { onClick: () => {
+  const listen = button('Listen', { onClick: () => {
     status.textContent = '';
     const readable = panel.cloneNode(true);
     readable.querySelectorAll('button,[data-example-audio]').forEach(node => node.remove());
     speak(readable.textContent.replace(/\s+/g, ' ').trim(), {
       force: true,
-      onError: () => { status.textContent = 'Voice is unavailable here. Follow the pictures and words.'; },
+      onError: () => { status.textContent = 'No voice is available. Follow the pictures.'; },
     });
   } });
   listen.dataset.exampleAudio = '';

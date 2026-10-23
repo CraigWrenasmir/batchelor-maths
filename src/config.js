@@ -8,7 +8,7 @@ export const school = {
   logo: 'assets/batchelor-area-school-logo.jpg',
   logoAlt: 'Batchelor Area School logo',
   collectionTitle: 'Maths sampler',
-  tagline: 'Count, pack, find, place, build. Choose an investigation.',
+  tagline: 'Choose an activity.',
   // Short acknowledgement shown on the home page. Wording should be checked
   // and approved by the school and community before public use.
   acknowledgement: 'Batchelor Area School is on the Country of the Kungarakan and Warai peoples.',

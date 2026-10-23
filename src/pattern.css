@@ -61,8 +61,30 @@ html[data-mode="class"] .pattern-activity { --pattern-cell-size: 56px; }
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
     align-items: end;
-    --preview-tile-size: 14px;
+    --preview-tile-size: min(24px, calc((100% - 8px) / var(--max-preview-cols, 7)));
   }
   .pattern-main-building .steps .step { width: 100%; padding: 8px 6px; }
   .pattern-main-building .steps svg { max-width: 100%; height: auto; margin-inline: auto; }
+}
+/* Keep the examples beside the answer pad on an iPad. The diagrams can
+   scale; the building squares and answer buttons keep their touch size. */
+@media (min-width: 700px) and (max-width: 1300px) {
+  html:not([data-mode="class"]) .pattern-activity.growing-pattern .two-col:not(.building-layout) {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+  html:not([data-mode="class"]) .pattern-activity.growing-pattern .two-col:not(.building-layout) .steps {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end; gap: 8px; --preview-tile-size: min(24px, calc((100% - 8px) / var(--max-preview-cols, 7)));
+  }
+  html:not([data-mode="class"]) .pattern-activity.growing-pattern .two-col:not(.building-layout) .step { padding: 8px; }
+  html:not([data-mode="class"]) .pattern-activity.growing-pattern .two-col:not(.building-layout) .steps svg {
+    max-width: 100%; height: auto; margin-inline: auto;
+  }
+  .pattern-comparison .step { flex-basis: 140px; }
+  .pattern-activity .values th, .pattern-activity .values td { padding: 6px; min-width: 2em; }
+}
+
+@media (min-width: 1000px) and (max-width: 1300px) {
+  .pattern-activity #side .keypad { gap: 8px; }
+  .pattern-activity #side .keypad .btn { min-height: 52px; }
 }

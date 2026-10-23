@@ -3,6 +3,13 @@
 import { school } from './config.js';
 import { demoFor } from './demos.js';
 
+const icons = {
+  home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8M5 10v10h5v-6h4v6h5V10"/></svg>',
+  listen: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM17 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg>',
+  show: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="m10 8 6 4-6 4z"/></svg>',
+  hint: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16c0-2-3-3-3-7a7 7 0 0 1 14 0c0 4-3 5-3 7zm1 4h6m-5 3h4"/></svg>'
+};
+
 export const params = new URLSearchParams(location.search);
 
 export function setting(name, fallback) {
@@ -59,32 +66,42 @@ export function mountShell({ title, activity, onNewLearner, teacherControls = []
   root.className = 'app';
   root.innerHTML = `
     <header class="app-bar">
-      <a class="bar-btn" href="../index.html" aria-label="Home">⌂ <span>Home</span></a>
+      <a class="bar-btn" href="../index.html" aria-label="Home">${icons.home}<span>Home</span></a>
       <h1 class="title">${title}</h1>
-      <div class="tools">
-        <button class="bar-btn" id="btn-mode" aria-pressed="${mode === 'class'}">▭ <span>Big screen</span></button>
-        <button class="bar-btn" id="btn-full">⤢ <span>Full screen</span></button>
-        <button class="bar-btn" id="btn-setup">⚙ <span>Set up</span></button>
-        <button class="bar-btn" id="btn-new">↺ <span>New learner</span></button>
-      </div>
+      <button class="bar-btn teacher-button" id="btn-setup">Teacher</button>
     </header>
-    <nav class="help-bar" aria-label="Activity help">
-      <button class="btn btn-quiet" id="btn-listen">Listen</button>
-      <button class="btn btn-quiet" id="btn-example">Show me</button>
-      <button class="btn btn-quiet" id="btn-sound" aria-pressed="${soundOn}">Read feedback</button>
+    <nav class="help-bar" aria-label="Help">
+      <button class="btn btn-quiet" id="btn-listen">${icons.listen}<span>Listen</span></button>
+      <button class="btn btn-quiet" id="btn-example">${icons.show}<span>Show me</span></button>
+      <button class="btn btn-quiet" id="btn-hint">${icons.hint}<span>Hint</span></button>
       <span class="small muted" id="audio-status" role="status"></span>
     </nav>
     <main class="stage" id="stage"></main>
     <footer class="teacher-bar" id="teacher-bar" hidden></footer>
     <div class="visually-hidden" aria-live="polite" id="live"></div>
-    <dialog class="drawer" id="drawer" aria-labelledby="drawer-title"><div class="sheet" id="sheet"></div></dialog>
+    <dialog class="drawer" id="drawer" aria-labelledby="drawer-title"><div class="sheet" id="sheet">
+      <div class="teacher-options" id="teacher-options" aria-label="Teacher tools">
+        <div class="teacher-switches">
+          <button class="btn btn-quiet" id="btn-mode" aria-pressed="${mode === 'class'}">Big screen</button>
+          <button class="btn btn-quiet" id="btn-sound" aria-pressed="${soundOn}">Read feedback</button>
+          <button class="btn btn-quiet" id="btn-full">Full screen</button>
+          <button class="btn btn-quiet" id="btn-new">New learner</button>
+        </div>
+        <a class="teacher-guide-link" href="../docs/teacher-guides.html#${activity}">Teacher guide</a>
+      </div>
+    </div></dialog>
     <dialog class="example-dialog" id="example-dialog" aria-labelledby="example-title"></dialog>
   `;
   liveRegion = root.querySelector('#live');
   const stage = root.querySelector('#stage');
+  const teacherOptions = root.querySelector('#teacher-options');
+  const hintControl = teacherControls.find(c => c.key === 'h');
+  const hintButton = root.querySelector('#btn-hint');
+  hintButton.hidden = !hintControl;
+  hintButton.onclick = () => { stopSpeech(); hintControl?.onClick(); };
   const stopSpeech = () => { try { window.speechSynthesis?.cancel(); } catch {} };
   const audioStatus = root.querySelector('#audio-status');
-  const audioError = () => { audioStatus.textContent = 'Voice is unavailable here. Use the pictures and on-screen instructions.'; };
+  const audioError = () => { audioStatus.textContent = 'No voice is available. Use Show me.'; };
   const visibleText = selectors => [...stage.querySelectorAll(selectors)].filter(e => e.getClientRects().length && !e.closest('[hidden]')).map(e=>e.textContent.trim()).filter(Boolean).join(' ');
   const readInstruction = () => instructionReader?.() || visibleText('.prompt, .hint-text') || title;
   root.querySelector('#btn-listen').onclick = () => {
@@ -101,7 +118,7 @@ export function mountShell({ title, activity, onNewLearner, teacherControls = []
   root.querySelector('#btn-example').onclick = () => {
     stopSpeech();
     if (exampleAction) { exampleAction(); return; }
-    exampleDialog.innerHTML = `<h2 id="example-title">Show me: ${title}</h2><p class="muted">An example to try together.</p>${demoFor(activity)}<div class="actions"><button class="btn" id="demo-listen">Listen to the example</button><button class="btn btn-primary" id="demo-close">Back to my task</button></div><p class="small" id="demo-audio-status" role="status"></p>`;
+    exampleDialog.innerHTML = `<h2 id="example-title">Show me</h2>${demoFor(activity)}<div class="actions"><button class="btn" id="demo-listen">Listen</button><button class="btn btn-primary" id="demo-close">Back</button></div><p class="small" id="demo-audio-status" role="status"></p>`;
     exampleDialog.querySelector('#demo-close').onclick = () => exampleDialog.close();
     exampleDialog.querySelector('#demo-listen').onclick = () => speak([...exampleDialog.querySelectorAll('.demo-step')].map(e=>e.textContent).join(' '), {force:true,onError:()=>{exampleDialog.querySelector('#demo-audio-status').textContent='Voice is unavailable. Follow the pictures and words.';}});
     exampleDialog.showModal();
@@ -117,7 +134,7 @@ export function mountShell({ title, activity, onNewLearner, teacherControls = []
   };
   root.querySelector('#btn-full').onclick = toggleFullscreen;
   root.querySelector('#btn-new').onclick = () => {
-    stopSpeech(); onNewLearner?.(); announce('Ready for the next learner.');
+    stopSpeech(); onNewLearner?.(); drawer.close(); announce('Ready for the next learner.');
     root.querySelector('.title').tabIndex = -1; root.querySelector('.title').focus();
   };
   const bar = root.querySelector('#teacher-bar');
@@ -132,10 +149,10 @@ export function mountShell({ title, activity, onNewLearner, teacherControls = []
   window.addEventListener('sampler-mode-change',e=>{root.querySelector('#btn-mode').setAttribute('aria-pressed',String(e.detail.mode==='class'));renderTeacherBar();});
   const drawer = root.querySelector('#drawer');
   const closeDrawer = () => drawer.close();
-  drawer.addEventListener('close',()=>requestAnimationFrame(()=>root.querySelector('#btn-setup').focus()));
+  drawer.addEventListener('close',()=>requestAnimationFrame(()=>{ if (!drawer.open) root.querySelector('#btn-setup').focus(); }));
   root.querySelector('#btn-setup').onclick = () => {
     if (!drawerContent) return;
-    stopSpeech(); const sheet = drawer.querySelector('#sheet'); sheet.replaceChildren(drawerContent());
+    stopSpeech(); const sheet = drawer.querySelector('#sheet'); sheet.replaceChildren(drawerContent(), teacherOptions);
     drawer.showModal();
   };
   drawer.addEventListener('click',e=>{if(e.target===drawer) {const r=drawer.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeDrawer();}});
@@ -197,13 +214,13 @@ export function keypad({ onDone, maxDigits = 4, allowNegative = false, doneLabel
   const entry = document.createElement('div');
   entry.className = 'entry empty';
   entry.setAttribute('aria-live', 'polite');
-  entry.textContent = 'Type a number';
+  entry.textContent = 'Tap a number';
   wrap.append(entry);
   const grid = document.createElement('div');
   grid.className = 'keypad';
   let value = '';
   const show = () => {
-    entry.textContent = value || 'Type a number';
+    entry.textContent = value || 'Tap a number';
     entry.classList.toggle('empty', !value);
   };
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', allowNegative ? '−' : '', '0', '⌫'];
@@ -238,10 +255,10 @@ export function keypad({ onDone, maxDigits = 4, allowNegative = false, doneLabel
 }
 
 export function talkPrompts(items, heading = 'Talk about it') {
-  const d = document.createElement('div');
+  const d = document.createElement('details');
   d.className = 'talk';
-  d.innerHTML = `<h3>${heading}</h3><ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
-  const listen = button('Listen to the questions', {quiet:true, onClick:()=>speak(items.join(' '), {force:true,onError:()=>announce('Voice is unavailable. The questions are shown on screen.')})});
+  d.innerHTML = `<summary>${heading}</summary><ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+  const listen = button('Listen', {quiet:true, onClick:()=>speak(items.join(' '), {force:true,onError:()=>announce('Voice is unavailable. The questions are shown on screen.')})});
   d.append(listen);
   return d;
 }

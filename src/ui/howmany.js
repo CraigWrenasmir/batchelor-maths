@@ -2,7 +2,7 @@
 // you go. Feedback explains the structure (tens and ones, groups, arrays).
 import { mountShell, setting, feedbackEl, button, keypad, talkPrompts, el, params } from '../shared.js';
 import { makeRng, randomSeed } from '../logic/rng.js';
-import { chooseScene, layoutScene, estimateMessage, describeCount, tally, countGroups, addGroup, checkTotal } from '../logic/howmany.js';
+import { chooseScene, layoutScene, describeCount, tally, countGroups, addGroup, checkTotal } from '../logic/howmany.js';
 import { HOW_MANY_PRESETS, howManyPreset } from '../../content/how-many.js';
 import { CONTEXTS, contextById } from '../../content/contexts.js';
 import { ensureDefs, svgEl, GROUNDS } from './scenes.js';
@@ -154,7 +154,7 @@ function refreshMarks() {
 
 function tapItem(id) {
   if (state.phase === 'estimate') {
-    feedback?.set('info', 'Make your estimate first. If you want to count straight away, tap "Skip the estimate".');
+    feedback?.set('info', 'Make a guess first. Or tap "Count now".');
     return;
   }
   if (state.phase !== 'count') return;
@@ -255,7 +255,7 @@ function showAnswerEntry() {
 function submitTotal(value) {
   const result = checkTotal(value, state.scene.n);
   if (!result.correct) {
-    feedback.set('try', result.message);
+    feedback.set('try', value < state.scene.n ? 'There are more. Count again.' : 'There are fewer. Count each one once.');
     pad.clear();
     pad.el.focus();
     return;
@@ -266,32 +266,32 @@ function submitTotal(value) {
 function renderPanel() {
   panel.innerHTML = '';
   if (state.phase === 'estimate') {
-    panel.append(el('p', { class: 'prompt', text: 'How many?' }));
-    panel.append(el('p', { class: 'hint-text', text: 'Make your best estimate. Then find the total.' }));
-    pad = keypad({ onDone: (v) => { state.estimate = v; state.phase = 'count'; renderPanel(); sceneWrap.querySelector('.cover')?.remove(); renderTally(); }, maxDigits: 3, doneLabel: 'That is my estimate' });
+    panel.append(el('p', { class: 'prompt', text: 'About how many?' }));
+    panel.append(el('p', { class: 'hint-text', text: 'Tap your best guess.' }));
+    pad = keypad({ onDone: (v) => { state.estimate = v; state.phase = 'count'; renderPanel(); sceneWrap.querySelector('.cover')?.remove(); renderTally(); }, maxDigits: 3, doneLabel: 'Use my guess' });
     panel.append(pad.el);
     const actions = el('div', { class: 'actions' });
-    actions.append(button('Skip the estimate', { quiet: true, onClick: () => { state.phase = 'count'; renderPanel(); sceneWrap.querySelector('.cover')?.remove(); } }));
+    actions.append(button('Count now', { quiet: true, onClick: () => { state.phase = 'count'; renderPanel(); sceneWrap.querySelector('.cover')?.remove(); } }));
     panel.append(actions);
     feedback = feedbackEl(panel);
     setTimeout(() => pad.el.focus(), 50);
   } else if (state.phase === 'count') {
-    panel.append(el('p', { class: 'prompt', text: state.answerOpen ? 'What is the total?' : 'Find the total.' }));
+    panel.append(el('p', { class: 'prompt', text: state.answerOpen ? 'How many altogether?' : `Count the ${state.context.noun[1]}.` }));
     panel.append(el('p', { class: 'hint-text', text: state.answerOpen
-      ? 'Enter your total. You can count or use groups to check.'
+      ? 'Tap your answer.'
       : currentArrangement() === 'scatter'
-        ? `Tap each ${state.context.noun[0]}, make groups, or enter a total you worked out.`
-        : 'Count whole groups, tap one at a time, or enter a total you worked out.' }));
-    if (state.estimate !== null) panel.append(el('p', { class: 'muted', text: `Your estimate: ${state.estimate}` }));
+        ? `Tap each ${state.context.noun[0]}.`
+        : 'Tap each item. Or tap a group button.' }));
+    if (state.estimate !== null) panel.append(el('p', { class: 'muted', text: `Your guess: ${state.estimate}` }));
     if (state.answerOpen) {
-      pad = keypad({ onDone: submitTotal, maxDigits: 3, doneLabel: 'Check total' });
+      pad = keypad({ onDone: submitTotal, maxDigits: 3, doneLabel: 'Check' });
       panel.append(pad.el);
     }
     const actions = el('div', { class: 'actions' });
-    if (!state.answerOpen) actions.append(button('I know the total', { primary: true, onClick: showAnswerEntry }));
-    else actions.append(button('Back to counting', { quiet: true, onClick: () => { state.answerOpen = false; renderPanel(); } }));
+    if (!state.answerOpen) actions.append(button('Enter total', { primary: true, onClick: showAnswerEntry }));
+    else actions.append(button('Count again', { quiet: true, onClick: () => { state.answerOpen = false; renderPanel(); } }));
     if (state.scene.arrangement === 'scatter') {
-      actions.append(button(state.showGroups ? 'See original layout' : `Make groups of ${state.scene.groupSize || 10}`, { onClick: toggleGrouping }));
+      actions.append(button(state.showGroups ? 'Spread out' : `Groups of ${state.scene.groupSize || 10}`, { onClick: toggleGrouping }));
     }
     actions.append(button('Count one', { quiet: true, onClick: countNext }));
     actions.append(button('Undo', { quiet: true, onClick: () => {
@@ -308,8 +308,8 @@ function renderPanel() {
     feedback = feedbackEl(panel);
     const actions = el('div', { class: 'actions' });
     actions.append(button('Next', { primary: true, onClick: newRound }));
-    actions.append(button('Try this collection again', { quiet: true, onClick: restartRound }));
-    if (state.scene.arrangement === 'scatter') actions.append(button(state.showGroups ? 'See original layout' : `See groups of ${state.scene.groupSize || 10}`, { onClick: toggleGrouping }));
+    actions.append(button('Try again', { quiet: true, onClick: restartRound }));
+    if (state.scene.arrangement === 'scatter') actions.append(button(state.showGroups ? 'Spread out' : `Groups of ${state.scene.groupSize || 10}`, { onClick: toggleGrouping }));
     panel.append(actions);
   }
 }
@@ -321,7 +321,7 @@ function finishCount(method = 'count') {
     state.layout.items.forEach((it) => {
       if (!state.marked.includes(it.id)) sceneWrap.querySelector(`.item[data-id="${it.id}"]`).classList.add('missed');
     });
-    feedback.set('try', `You counted ${state.marked.length}. ${missing} ${missing === 1 ? 'has' : 'have'} not been counted yet. ${missing === 1 ? 'It is' : 'They are'} marked with a dashed ring.`);
+    feedback.set('try', `${missing} left to count. Look for the dotted rings.`);
     return;
   }
   state.completion = method;
@@ -334,16 +334,18 @@ function finishCount(method = 'count') {
 function showFinishFeedback() {
   const n = state.scene.n;
   const parts = [];
-  if (state.completion === 'reveal') parts.push('Teacher reveal.');
-  if (state.estimate !== null) parts.push(estimateMessage(state.estimate, n));
-  else parts.push(`There are ${n}.`);
+  if (state.completion === 'reveal') parts.push('Shown by the teacher.');
+  if (state.estimate !== null) {
+    const difference = n - state.estimate;
+    parts.push(difference === 0 ? 'Your guess matches.' : `You guessed ${state.estimate}. There are ${Math.abs(difference)} ${difference > 0 ? 'more' : 'fewer'}.`);
+  } else if (state.completion !== 'reveal') parts.push('You found the total.');
   const groupedScene = state.showGroups ? { ...state.scene, arrangement: 'groups', groups: Math.floor(n / state.scene.groupSize), remainder: n % state.scene.groupSize } : state.scene;
-  feedback.set(state.completion === 'reveal' ? 'info' : 'ok', parts.join(' '), `One way to check: ${describeCount(groupedScene)}`);
+  feedback.set(state.completion === 'reveal' ? 'info' : 'ok', parts.join(' '), describeCount(groupedScene));
   talkBox.innerHTML = '';
   talkBox.append(talkPrompts([
-    state.estimate !== null ? 'How did your estimate compare with the total?' : 'How did you work out the total?',
-    state.scene.arrangement === 'rows' ? 'How could you use the rows to check without counting every one?' : `Can you check the total using ${state.scene.groupSize === 5 ? 'fives' : 'tens'}?`,
-    'If there were 10 more, how many would there be?',
+    state.estimate !== null ? 'Was your guess close?' : 'How did you count?',
+    state.scene.arrangement === 'rows' ? 'Can you count in rows?' : `Can you check the total using ${state.scene.groupSize === 5 ? 'fives' : 'tens'}?`,
+    'What if there were 10 more?',
   ]));
 }
 
@@ -352,17 +354,17 @@ function hint() {
   if (state.phase === 'estimate') {
     const ids = state.order.slice(0, Math.min(gs, state.scene.n));
     ids.forEach((id) => sceneWrap.querySelector(`.item[data-id="${id}"]`).classList.add('hinted'));
-    feedback?.set('info', `The dotted rings show a group of ${ids.length}. About how many groups like this are there?`);
+    feedback?.set('info', `Look at the ${ids.length} in dotted rings. How many groups can you see?`);
   } else if (state.phase === 'count') {
     const group = countGroups(state.layout, currentArrangement()).find((g) => g.ids.some((id) => !state.marked.includes(id)));
     if (group) {
       group.ids.forEach((id) => sceneWrap.querySelector(`.item[data-id="${id}"]`).classList.add('hinted'));
-      feedback?.set('info', `The dotted rings show ${group.ids.length} in one ${currentArrangement() === 'rows' ? 'row' : 'group'}. Use the group button or count these one at a time.`);
+      feedback?.set('info', `The dotted rings show ${group.ids.length}. Count this ${currentArrangement() === 'rows' ? 'row' : 'group'}.`);
       return;
     }
     const next = state.order.find((id) => !state.marked.includes(id));
     if (next !== undefined) sceneWrap.querySelector(`.item[data-id="${next}"]`).classList.add('hinted');
-    feedback?.set('info', `The dotted ring shows one that has not been counted yet.`);
+    feedback?.set('info', 'Tap the item in the dotted ring.');
   }
 }
 

@@ -2,7 +2,7 @@
 // mystery number using "bigger / smaller" clues.
 import { mountShell, setting, feedbackEl, button, talkPrompts, el, params } from '../shared.js';
 import { makeRng, randomSeed } from '../logic/rng.js';
-import { lineFor, generateCards, toFrac, fromFrac, snapValue, formatValue, judgePlacement, placementMessage, mysteryJudge, mysteryMessage, narrow, benchmarkText } from '../logic/numberline.js';
+import { lineFor, generateCards, toFrac, fromFrac, snapValue, formatValue, judgePlacement, mysteryJudge, mysteryMessage, narrow, benchmarkText } from '../logic/numberline.js';
 import { LINE_PRESETS, linePreset } from '../../content/number-line.js';
 import { svgEl } from './scenes.js';
 
@@ -64,12 +64,12 @@ function newRound(sameSeed = false) {
     state.secret = +(p.min + rng.int(1, steps - 1) * (p.resolution ?? 1)).toFixed(6);
     state.interval = [p.min, p.max];
     promptEl.textContent = 'Find the mystery number.';
-    subEl.textContent = `It is somewhere between ${formatValue(p.min, p)} and ${formatValue(p.max, p)}. Tap the line to guess.`;
+    subEl.textContent = `Between ${formatValue(p.min, p)} and ${formatValue(p.max, p)}. Tap the line to guess.`;
   } else {
     state.cards = generateCards(state.preset, state.preset.cards, rng);
     state.current = state.cards[0].id;
-    promptEl.textContent = 'Where does it go?';
-    subEl.textContent = 'Choose a card, then tap the line where it belongs. Check when they are all placed.';
+    promptEl.textContent = 'Put each card on the line.';
+    subEl.textContent = 'Tap a card. Tap its place on the line.';
   }
   renderCards();
   renderLine();
@@ -113,7 +113,7 @@ function renderLine() {
   lineSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   lineSvg.innerHTML = '';
   const big = document.documentElement.dataset.mode === 'class';
-  const fs = big ? 40 : 30;
+  const fs = big ? 46 : 40;
   lineSvg.append(svgEl('line', { class: 'track-bg', x1: X0, y1: Y, x2: X1, y2: Y }));
   // Ruled-out zones for mystery mode
   if (state.game === 'mystery') {
@@ -152,7 +152,8 @@ function renderLine() {
   for (const c of state.cards) {
     if (state.placed[c.id] === undefined) continue;
     const grade = c.grade || '';
-    drawPin(state.placed[c.id], c.revealed || grade === 'spot' || grade === 'close' ? c.display : (c.kind === 'dots' ? '•' : c.kind === 'label' ? c.display.split(' ')[0] : c.display), `${state.current === c.id ? 'current ' : ''}${grade}`, c.id);
+    const label = c.kind === 'label' ? formatValue(c.value, p) : c.revealed || grade === 'spot' || grade === 'close' ? c.display : (c.kind === 'dots' ? '•' : c.display);
+    drawPin(state.placed[c.id], label, `${state.current === c.id ? 'current ' : ''}${grade}`, c.id);
     if (c.showTruth) drawTruth(c.value);
   }
 }
@@ -160,7 +161,7 @@ function renderLine() {
 function drawPin(value, label, cls, id) {
   const x = xOf(value);
   const big = document.documentElement.dataset.mode === 'class';
-  const r = big ? 38 : 30;
+  const r = String(label).length > 3 ? 46 : (big ? 42 : 36);
   const m = svgEl('g', { class: `marker ${cls}`, 'data-id': id ?? '' });
   m.append(svgEl('line', { x1: x, y1: Y, x2: x, y2: Y - 44, stroke: '#2f5f3f', 'stroke-width': 4 }));
   m.append(svgEl('circle', { class: 'pin', cx: x, cy: Y - 48 - r, r }));
@@ -234,20 +235,20 @@ function renderActions() {
     actionsEl.querySelector(direction < 0 ? '[data-adjust="left"]' : '[data-adjust="right"]')?.focus();
   };
   for (const [direction, name] of [[-1, 'left'], [1, 'right']]) {
-    const b = button(`Move ${name}`, { quiet: true, onClick: () => shift(direction) });
-    b.dataset.adjust = name; b.disabled = locked; adjust.append(b);
+    const b = button(name === 'left' ? '← Left' : 'Right →', { quiet: true, onClick: () => shift(direction) });
+    b.setAttribute('aria-label', `Move ${name}`); b.dataset.adjust = name; b.disabled = locked; adjust.append(b);
   }
-  adjust.append(el('span', { class: 'small', text: current == null ? 'Tap the line, or use Move left / right.' : `Marker at ${formatValue(current, state.preset)}` }));
+  adjust.append(el('span', { class: 'small', text: current == null ? 'Tap the line.' : `At ${formatValue(current, state.preset)}` }));
   actionsEl.append(adjust);
   if (state.game === 'mystery') {
-    const g = button(state.pending === null ? 'Tap the line to choose a guess' : `Guess ${formatValue(state.pending, state.preset)}`, { primary: true, onClick: guess });
+    const g = button(state.pending === null ? 'Guess' : `Guess ${formatValue(state.pending, state.preset)}`, { primary: true, onClick: guess });
     g.disabled = state.pending === null || state.guesses.some((x) => x.verdict === 'found');
     actionsEl.append(g);
-    actionsEl.append(button('New mystery', { quiet: true, onClick: () => newRound() }));
+    actionsEl.append(button('Next', { quiet: true, onClick: () => newRound() }));
     return;
   }
   const allPlaced = state.cards.every((c) => state.placed[c.id] !== undefined);
-  const check = button(state.checked === 0 ? 'Check' : 'Check again', { primary: true, onClick: check_ });
+  const check = button('Check', { primary: true, onClick: check_ });
   check.disabled = !allPlaced || state.cards.every((c) => c.grade === 'spot');
   actionsEl.append(check);
   actionsEl.append(button('Next', { quiet: true, onClick: () => newRound() }));
@@ -265,21 +266,21 @@ function check_() {
   }
   renderLine(); renderCards(); renderActions();
   const worst = results.slice().sort((a, b) => b.j.errorFrac - a.j.errorFrac)[0];
-  const close = results.filter(({j}) => j.grade === 'close').length;
-  const summary = good === state.cards.length ? `All ${good} exactly placed.` : `${good} of ${state.cards.length} exactly placed.${close ? ` ${close} close: keep adjusting.` : ''}`;
+  const summary = good === state.cards.length ? 'All in the right place.' : `${good} of ${state.cards.length} in the right place.`;
+  const move = `${worst.c.kind === 'label' ? worst.c.display : formatValue(worst.c.value, p)}: move ${worst.j.direction === 'right' ? 'left' : 'right'}.`;
   if (good === state.cards.length) {
     feedback.set('ok', summary, benchmarkText(worst.c.value, p));
   } else if (state.checked < 2) {
-    feedback.set('try', `${summary} ${placementMessage(worst.c, state.placed[worst.c.id], p)} Choose an unfinished card. Move it and check again.`);
+    feedback.set('try', summary, `${move} Then tap Check.`);
   } else {
-    feedback.set('info', `${summary} The green triangles show the exact positions. You can move the unfinished cards and check again.`, placementMessage(worst.c, state.placed[worst.c.id], p));
+    feedback.set('info', summary, 'Move the cards to the triangles. Then tap Check.');
   }
   if (good === state.cards.length || state.checked >= 2) {
     talkBox.innerHTML = '';
     talkBox.append(talkPrompts([
-      'Which number was hardest to place? Why?',
-      'What did you use as a landmark on the line?',
-      p.kind === 'fraction' ? 'Where would 1 whole and a half go if the line kept going?' : 'If the line went to double this, where would these numbers be?',
+      'Which card was hard to place?',
+      'Which numbers helped you?',
+      p.kind === 'fraction' ? 'Where would 1 and a half go?' : 'What if the line went twice as far?',
     ]));
   }
 }
@@ -293,12 +294,11 @@ function guess() {
   state.pending = null;
   renderLine(); renderCards(); renderActions();
   if (verdict === 'found') {
-    feedback.set('ok', `${msg} You found it in ${state.guesses.length} ${state.guesses.length === 1 ? 'guess' : 'guesses'}.`);
+    feedback.set('ok', msg);
     talkBox.innerHTML = '';
-    talkBox.append(talkPrompts(['Which guess helped the most? Why?', 'What is the fewest guesses that would always work?', 'Where is halfway between your last two guesses?']));
+    talkBox.append(talkPrompts(['Which guess helped most?', 'Can you find it in fewer guesses?', 'Where is halfway?']));
   } else {
-    const [lo, hi] = state.interval;
-    feedback.set('try', msg, `It is now between ${formatValue(lo, state.preset)} and ${formatValue(hi, state.preset)}. The grey parts are ruled out.`);
+    feedback.set('try', msg, 'Try the part that is not grey.');
   }
 }
 
@@ -307,7 +307,7 @@ function hint() {
   if (state.game === 'mystery') {
     const [lo, hi] = state.interval;
     const mid = snapValue((lo + hi) / 2, p);
-    feedback.set('info', `Try halfway between ${formatValue(lo, p)} and ${formatValue(hi, p)}: that is ${formatValue(mid, p)}. A halfway guess rules out the most.`);
+    feedback.set('info', `Try ${formatValue(mid, p)}. It is halfway between ${formatValue(lo, p)} and ${formatValue(hi, p)}.`);
     return;
   }
   const c = state.cards.find((x) => x.id === state.current) || state.cards[0];
@@ -325,7 +325,7 @@ function reveal() {
   for (const c of state.cards) { state.placed[c.id] = c.value; c.grade = 'spot'; c.showTruth = true; c.revealed = true; }
   state.checked = 2;
   renderLine(); renderCards(); renderActions();
-  feedback.set('info', 'Here is where each number belongs.', state.cards.map((c) => benchmarkText(c.value, state.preset)).join(' '));
+  feedback.set('info', 'Here is where each card goes.');
 }
 
 function drawerContent() {
